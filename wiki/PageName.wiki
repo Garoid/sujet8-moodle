@@ -1,5 +1,5 @@
-#summary One-sentence summary of this page.
 #labels specs
+#les speces de la future WebApp permettant l'extraction de sujets sur les forums Moodle
 
 = Specs de la web application =
 
