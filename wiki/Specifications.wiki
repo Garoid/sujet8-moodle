@@ -22,8 +22,11 @@ Fonctionnalités de la servlet :
 
 L'extraction des différents sujets d'un forum se fera à partir d'une URL donnée en paramètre. A partir de cette URL, la servlet ira récupérer en parcourant si nécessaire, les sous catégories du forum si l'URL donnée pointe sur l'index ou une liste de rubriques.
 
-Les pages extraites seront stockées en locale au format XML. Si une nouvelle extraction est demandée par l'utilisateur, et qu'elle porte sur une partie du forum précédemment extraite. La XML déjà enregistré sera récupéré et comparé et si nécessaire mis à jour (si le topic ou la rubrique a été modifiée)
+Les pages extraites seront stockées en locale au format XML. Si une nouvelle extraction est demandée par l'utilisateur, et qu'elle porte sur une partie du forum précédemment extraite. Le XML déjà enregistré sera récupéré et comparé et si nécessaire mis à jour (si le topic ou la rubrique a été modifiée).
 
+Pour extraire les informations des pages nous utiliserons un parser XML qui sera soit HTMLParser ou DOM (la version de Xerces).
+
+Afin de minimiser le coût en espace disque des fichiers XML, les référence ou "quote" sur un message précédent se fera par référence afin d'éviter les doublons et pour faciliter la mise à jour des pages (dans le cas d'une édition).
 
 
 = Questions : =
