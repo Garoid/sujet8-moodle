@@ -19,8 +19,8 @@ Langages utilisés :
 -partie métier : servlet (J2EE)
 
 Fonctionnalités de la servlet :
-L'extraction des différents sujets d'un forum se fera à partir d'une URL donnée en paramètre. A partir de cette URL, la servlet ira récupérer en parcourant si nécessaire, les sous catégories du forum si l'URL donnée pointe sur l'index ou une liste de rubriques.
 
+L'extraction des différents sujets d'un forum se fera à partir d'une URL donnée en paramètre. A partir de cette URL, la servlet ira récupérer en parcourant si nécessaire, les sous catégories du forum si l'URL donnée pointe sur l'index ou une liste de rubriques. 
 
 
 
