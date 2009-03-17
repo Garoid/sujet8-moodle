@@ -31,6 +31,8 @@ Afin de minimiser le coût en espace disque des fichiers XML, les référence ou
 
 = Questions : =
 
-Les fichiers xml modélisant les topics du forum doivent-ils être sauver en dur sur le disque de la machine ?
+Doit-il y avoir un seul XML modélisant l'ensemble des topics extraits ou plusieurs et comment les découper (un par topic, un par rubrique) ?
+
+La servlet doit-elle se loguer lors de la connexion sur le forum ?
 
 *dépendant du temps restant en fin de projet.
