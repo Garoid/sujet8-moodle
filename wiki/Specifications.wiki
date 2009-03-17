@@ -20,7 +20,9 @@ Langages utilisés :
 
 Fonctionnalités de la servlet :
 
-L'extraction des différents sujets d'un forum se fera à partir d'une URL donnée en paramètre. A partir de cette URL, la servlet ira récupérer en parcourant si nécessaire, les sous catégories du forum si l'URL donnée pointe sur l'index ou une liste de rubriques. 
+L'extraction des différents sujets d'un forum se fera à partir d'une URL donnée en paramètre. A partir de cette URL, la servlet ira récupérer en parcourant si nécessaire, les sous catégories du forum si l'URL donnée pointe sur l'index ou une liste de rubriques.
+
+Les pages extraites seront stockées en locale au format XML. Si une nouvelle extraction est demandée par l'utilisateur, et qu'elle porte sur une partie du forum précédemment extraite. La XML déjà enregistré sera récupéré et comparé et si nécessaire mis à jour (si le topic ou la rubrique a été modifiée)
 
 
 
