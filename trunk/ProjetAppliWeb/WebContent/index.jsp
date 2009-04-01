@@ -8,15 +8,8 @@
 </head>
 <body>
 <p>Adresse du forum à extraire :
-<form method="get" action="ExtractTopics"> 
-<input type="text" name="adresse" value="file:///home/vincent/wget/localhost/moodle/mod/forum/view.php%3Ff=1"/>
-<input type="submit" value="Extaire"/>
-</form>
-
-</p>
-<p>Adresse à explorer :
 <form method="get" action="SubDiscussionChecker"> 
-<input type="text" name="adresse" value="file:///home/vincent/wget/localhost/moodle/mod/forum/view.php%3Ff=1"/>
+<input type="text" name="adresse" value="file:///home/max06/localhost/moodle/mod/forum/view.php%3Ff=1"/>
 <input type="submit" value="Extaire"/>
 </p>
 </form>

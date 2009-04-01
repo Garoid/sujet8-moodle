@@ -1,14 +1,8 @@
-package servlet;
+package utils;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.htmlparser.Node;
 import org.htmlparser.Parser;
@@ -24,34 +18,9 @@ import org.htmlparser.util.NodeIterator;
 import org.htmlparser.util.NodeList;
 import org.htmlparser.util.ParserException;
 
-import utils.Post;
-
-/**
- * Servlet implementation class Discussion
- */
-public class ExtractTopics extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-
-	/**
-	 * @see HttpServlet#HttpServlet()
-	 */
-	public ExtractTopics() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
-
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
-	 *      response)
-	 */
-	protected void doGet(HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException {
-		PrintWriter out = response.getWriter();
-		String adresse = request.getParameter("adresse");
-		extractalltag(out, adresse);
-	}
-
-	public void extractalltag(PrintWriter out, String adresse) {
+public class ExtractTopics {
+	
+	public static void extractalltag(PrintWriter out, String adresse) {
 		Parser parser = null;
 		AndFilter sujetFiltre = new AndFilter(new TagNameFilter("div"),new HasAttributeFilter("class", "subject"));
 		AndFilter idFrere = new AndFilter(new TagNameFilter("table"),
@@ -123,7 +92,7 @@ public class ExtractTopics extends HttpServlet {
 		}
 	}
 
-	public String extractLinkParent(Node node, PrintWriter out)
+	public static String extractLinkParent(Node node, PrintWriter out)
 			throws ParserException {
 		if (node instanceof TagNode) {
 			TagNode tag = (TagNode) node;
@@ -144,7 +113,7 @@ public class ExtractTopics extends HttpServlet {
 		return null;
 	}
 
-	public String extractLinkTagAttribute(Node node, String attribute)
+	public static String extractLinkTagAttribute(Node node, String attribute)
 			throws ParserException {
 		if (node instanceof TagNode) {
 
@@ -159,7 +128,7 @@ public class ExtractTopics extends HttpServlet {
 		return null;
 	}
 
-	public String extractLinkTagText(Node node) throws ParserException {
+	public static String extractLinkTagText(Node node) throws ParserException {
 		if (node instanceof TagNode) {
 
 			TagNode tag = (TagNode) node;
@@ -173,7 +142,7 @@ public class ExtractTopics extends HttpServlet {
 		return null;
 	}
 
-	public String extractNodeToHtml(Node node) throws ParserException {
+	public static String extractNodeToHtml(Node node) throws ParserException {
 		if (node instanceof TextNode) {
 
 			TextNode text = (TextNode) node;
@@ -207,7 +176,7 @@ public class ExtractTopics extends HttpServlet {
 		return null;
 	}
 
-	public String extractTextNode(Node node) throws ParserException {
+	public static String extractTextNode(Node node) throws ParserException {
 		if (node instanceof TextNode) {
 
 			TextNode text = (TextNode) node;
@@ -227,7 +196,7 @@ public class ExtractTopics extends HttpServlet {
 		return null;
 	}
 
-	public void showAllPost(List l, PrintWriter out) {
+	public static void showAllPost(List l, PrintWriter out) {
 		for (Post p : (ArrayList<Post>) l) {
 			out.println("Id: " + p.getId());
 			out.println("Auteur: " + p.getAuteur());
@@ -239,7 +208,7 @@ public class ExtractTopics extends HttpServlet {
 		}
 	}
 
-	public String extractDate(Node auteur) {
+	public static String extractDate(Node auteur) {
 		String date = null;
 		String ligne = auteur.toPlainTextString();
 		String[] res = ligne.split("-");
@@ -247,20 +216,11 @@ public class ExtractTopics extends HttpServlet {
 		return date;
 	}
 
-	public String extractIdParent(String linkParent) {
+	public static String extractIdParent(String linkParent) {
 		String idParent = null;
 		String[] res = linkParent.split("#");
 		idParent = res[1];
 		return idParent;
-	}
-
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
-	 *      response)
-	 */
-	protected void doPost(HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
 	}
 
 }
