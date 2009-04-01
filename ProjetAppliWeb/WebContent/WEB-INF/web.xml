@@ -11,16 +11,6 @@
   </welcome-file-list>
   <servlet>
     <description></description>
-    <display-name>ExtractTopics</display-name>
-    <servlet-name>ExtractTopics</servlet-name>
-    <servlet-class>servlet.ExtractTopics</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>ExtractTopics</servlet-name>
-    <url-pattern>/ExtractTopics</url-pattern>
-  </servlet-mapping>
-  <servlet>
-    <description></description>
     <display-name>SubDiscussionChecker</display-name>
     <servlet-name>SubDiscussionChecker</servlet-name>
     <servlet-class>servlet.SubDiscussionChecker</servlet-class>
