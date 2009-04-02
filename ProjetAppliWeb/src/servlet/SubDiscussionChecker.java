@@ -40,12 +40,12 @@ public class SubDiscussionChecker extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String adresse = request.getParameter("adresse"); 
-		URL forumURL = new URL(adresse);
-		Runtime run = Runtime.getRuntime();
-		String cookiesPath = this.getClass().getResource("/resources/cookies.txt").getPath();
-//		File wgetResultFile = new File(this.getClass().getResource("/resources/wgetExtract").getPath());
-		File wgetResultFile = new File(pathToLocalForumFiles);
-		run.exec(" wget -r -np -l inf --load-cookies " +cookiesPath + " " +forumURL, null , wgetResultFile);
+//		URL forumURL = new URL(adresse);
+//		Runtime run = Runtime.getRuntime();
+//		String cookiesPath = this.getClass().getResource("/resources/cookies.txt").getPath();
+////		File wgetResultFile = new File(this.getClass().getResource("/resources/wgetExtract").getPath());
+//		File wgetResultFile = new File(pathToLocalForumFiles);
+//		run.exec(" wget -r -np -l inf --load-cookies " +cookiesPath + " " +forumURL, null , wgetResultFile);
 		try {
 			
 			Parser parser = new Parser(adresse);
