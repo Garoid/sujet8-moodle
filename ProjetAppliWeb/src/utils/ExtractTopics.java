@@ -1,8 +1,17 @@
 package utils;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.stream.StreamResult;
 
 import org.htmlparser.Node;
 import org.htmlparser.Parser;
@@ -17,10 +26,18 @@ import org.htmlparser.tags.LinkTag;
 import org.htmlparser.util.NodeIterator;
 import org.htmlparser.util.NodeList;
 import org.htmlparser.util.ParserException;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.Attribute;
+import org.jdom.input.SAXBuilder;
+import org.jdom.output.XMLOutputter;
+import org.jdom.transform.JDOMSource;
+
 
 public class ExtractTopics {
 
-	public static void extractalltag(PrintWriter out, String adresse) {
+	public static void extractalltag(PrintWriter out, String adresse,
+			String filePath) {
 		Parser parser = null;
 		AndFilter sujetFiltre = new AndFilter(new TagNameFilter("div"),
 				new HasAttributeFilter("class", "subject"));
@@ -83,6 +100,7 @@ public class ExtractTopics {
 				res.add(p);
 			}
 			showAllPost(res, out);
+			writeAllPostToXml(res, filePath);
 		} catch (ParserException e) {
 			e.printStackTrace();
 		}
@@ -196,6 +214,66 @@ public class ExtractTopics {
 			out.println("message: " + p.getMessage());
 			out.println("parent: " + p.getParent());
 			out.println();
+		}
+	}
+
+	public static void writeAllPostToXml(List l, String filePath) {
+		File file = new File(filePath);
+		Document document = null;
+		Element racine = null;
+		if (!file.exists()) {
+			racine = new Element("forum");
+			document = new Document(racine);
+		}
+		SAXBuilder sxb = new SAXBuilder();
+		try {
+			document = sxb.build(new File(filePath));
+		} catch (Exception e) {
+		}
+		racine = document.getRootElement();
+		Element topic = new Element("topic");
+		for (Post p : (ArrayList<Post>) l) {
+			Element post = new Element("post");
+			Attribute id = new Attribute("id", p.getId());
+			post.setAttribute(id);
+
+			Element auteur = new Element("auteur");
+			auteur.setText(p.getAuteur());
+			post.addContent(auteur);
+
+			Element date = new Element("date");
+			date.setText(p.getDate());
+			post.addContent(date);
+
+			Element message = new Element("message");
+			message.setText(p.getMessage());
+			post.addContent(message);
+
+			Element parent = new Element("parent");
+			parent.setText(p.getParent());
+			post.addContent(parent);
+			
+			Attribute nomTopic = new Attribute("nom", p.getSujet());
+			topic.setAttribute(nomTopic);
+			topic.addContent(post);
+			
+		}
+		racine.addContent(topic);
+		JDOMSource source = new JDOMSource(document);
+		StreamResult result = new StreamResult(filePath);
+		Transformer transformer = null;
+		try {
+			transformer = TransformerFactory.newInstance().newTransformer();
+			transformer.transform(source, result);
+		} catch (TransformerConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransformerFactoryConfigurationError e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransformerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
