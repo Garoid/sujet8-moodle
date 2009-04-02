@@ -19,10 +19,11 @@ import org.htmlparser.util.NodeList;
 import org.htmlparser.util.ParserException;
 
 public class ExtractTopics {
-	
+
 	public static void extractalltag(PrintWriter out, String adresse) {
 		Parser parser = null;
-		AndFilter sujetFiltre = new AndFilter(new TagNameFilter("div"),new HasAttributeFilter("class", "subject"));
+		AndFilter sujetFiltre = new AndFilter(new TagNameFilter("div"),
+				new HasAttributeFilter("class", "subject"));
 		AndFilter idFrere = new AndFilter(new TagNameFilter("table"),
 				new HasAttributeFilter("class", "forumpost"));
 		AndFilter idFiltre = new AndFilter(new TagNameFilter("a"),
@@ -35,8 +36,6 @@ public class ExtractTopics {
 				new HasParentFilter(divAuteur));
 		AndFilter divCommands = new AndFilter(new TagNameFilter("div"),
 				new HasAttributeFilter("class", "commands"));
-		AndFilter parentFiltre = new AndFilter(new TagNameFilter("a"),
-				new HasParentFilter(divCommands));
 
 		try {
 			parser = new Parser(adresse);
@@ -72,42 +71,34 @@ public class ExtractTopics {
 				Node tmp5 = list.elementAt(i);
 				String id = extractLinkTagAttribute(tmp5, "id");
 				parser.reset();
-				
-				String parent = null;
-//				if (i != 0) {
-//					list = parser.parse(parentFiltre);
-//					Node tmp6 = list.elementAt(i);
-//					String linkParent = extractLinkParent(tmp6, out);
-////				parent = extractIdParent(linkParent);
-//					parser.reset();
-//				}
+
+				list = parser.parse(divCommands);
+				Node tmp6 = list.elementAt(i);
+				String linkParent = extractLinkParent(tmp6.getFirstChild());
+				String parent = extractIdParent(linkParent);
+				parser.reset();
 
 				list = parser.parse(sujetFiltre);
 				Post p = new Post(id, sujet, auteur, message, date, parent);
 				res.add(p);
 			}
-			 showAllPost(res, out);
+			showAllPost(res, out);
 		} catch (ParserException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static String extractLinkParent(Node node, PrintWriter out)
-			throws ParserException {
+	public static String extractLinkParent(Node node) throws ParserException {
 		if (node instanceof TagNode) {
 			TagNode tag = (TagNode) node;
 			if (tag instanceof LinkTag) {
 				LinkTag link = (LinkTag) tag;
-				NodeList nl = link.getChildren();
-				if (nl != null) {
-					for (NodeIterator i = nl.elements(); i.hasMoreNodes();) {
-						Node tmp = i.nextNode();
-						if (tmp.getText().equals("Show parent")) {
-							String res = link.getLink();
-							return res;
-						}
-					}
+				Node firstChild = link.getFirstChild();
+				if (firstChild.toPlainTextString().equals("Show parent")) {
+					String res = link.getLink();
+					return res;
 				}
+				return null;
 			}
 		}
 		return null;
@@ -217,10 +208,13 @@ public class ExtractTopics {
 	}
 
 	public static String extractIdParent(String linkParent) {
-		String idParent = null;
-		String[] res = linkParent.split("#");
-		idParent = res[1];
-		return idParent;
+		if (linkParent != null) {
+			String idParent = null;
+			String[] res = linkParent.split("#");
+			idParent = res[1];
+			return idParent;
+		} else
+			return null;
 	}
 
 }
