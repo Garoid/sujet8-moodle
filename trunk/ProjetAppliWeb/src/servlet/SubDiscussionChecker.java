@@ -26,6 +26,7 @@ import utils.ExtractTopics;
 public class SubDiscussionChecker extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private final String pathToLocalForumFiles = "/home/max06";
+	private final String pathToLocalXmlFile = "/home/max06/forum.xml";
        
     /**
      * @see HttpServlet#HttpServlet()
@@ -78,8 +79,7 @@ public class SubDiscussionChecker extends HttpServlet {
 				String href = hrefChild.getAttribute("href");
 				href = href.replaceFirst("http://", "file://" + pathToLocalForumFiles + "/");
 				href = href.replaceAll("\\?","%3F");
-				System.out.println(href);
-				ExtractTopics.extractalltag(out, href);
+				ExtractTopics.extractalltag(out, href, pathToLocalXmlFile);
 				out.println("-----------------------------------------");
 			}
 		}
