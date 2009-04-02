@@ -1,10 +1,11 @@
 package servlet;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URL;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,7 +40,14 @@ public class SubDiscussionChecker extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String adresse = request.getParameter("adresse"); 
+		URL forumURL = new URL(adresse);
+		Runtime run = Runtime.getRuntime();
+		String cookiesPath = this.getClass().getResource("/resources/cookies.txt").getPath();
+//		File wgetResultFile = new File(this.getClass().getResource("/resources/wgetExtract").getPath());
+		File wgetResultFile = new File(pathToLocalForumFiles);
+		run.exec(" wget -r -np -l inf --load-cookies " +cookiesPath + " " +forumURL, null , wgetResultFile);
 		try {
+			
 			Parser parser = new Parser(adresse);
 			AndFilter discussionsFilter = new AndFilter(new TagNameFilter("table"), new HasAttributeFilter("class", "forumheaderlist"));
 			NodeList list = parser.parse(discussionsFilter);
