@@ -1,7 +1,6 @@
 package utils;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,11 +29,11 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Attribute;
 import org.jdom.input.SAXBuilder;
-import org.jdom.output.XMLOutputter;
 import org.jdom.transform.JDOMSource;
 
-
 public class ExtractTopics {
+
+	private static String nomForum = null;
 
 	public static void extractalltag(PrintWriter out, String adresse,
 			String filePath) {
@@ -53,6 +52,8 @@ public class ExtractTopics {
 				new HasParentFilter(divAuteur));
 		AndFilter divCommands = new AndFilter(new TagNameFilter("div"),
 				new HasAttributeFilter("class", "commands"));
+		AndFilter nomForumFiltre = new AndFilter(new TagNameFilter("li"),
+				new HasAttributeFilter("class", "first"));
 
 		try {
 			parser = new Parser(adresse);
@@ -99,6 +100,10 @@ public class ExtractTopics {
 				Post p = new Post(id, sujet, auteur, message, date, parent);
 				res.add(p);
 			}
+			parser.reset();
+			list = parser.parse(nomForumFiltre);
+			nomForum = extractNomForum(
+					list.elementAt(list.size() - 2).toPlainTextString()).trim();
 			showAllPost(res, out);
 			writeAllPostToXml(res, filePath);
 		} catch (ParserException e) {
@@ -221,8 +226,12 @@ public class ExtractTopics {
 		File file = new File(filePath);
 		Document document = null;
 		Element racine = null;
+		Element forum = null;
+		List listChild = null;
+		Boolean nomForumExist = false;
+
 		if (!file.exists()) {
-			racine = new Element("forum");
+			racine = new Element("moodle");
 			document = new Document(racine);
 		}
 		SAXBuilder sxb = new SAXBuilder();
@@ -232,6 +241,25 @@ public class ExtractTopics {
 		}
 		racine = document.getRootElement();
 		Element topic = new Element("topic");
+		listChild = racine.getChildren("forum");
+		for (int i = 0; i < listChild.size(); i++) {
+			if (((Element) listChild.get(i)).getAttributeValue("name").equals(
+					nomForum)) {
+				nomForumExist = true;
+				forum = ((Element) listChild.get(i));
+				forum.addContent(topic);
+				racine.removeChild(((Element) listChild.get(i)).getName());
+				racine.addContent(forum);
+				break;
+			}
+		}
+		if (!nomForumExist) {
+			forum = new Element("forum");
+			Attribute nomFor = new Attribute("name", nomForum);
+			forum.setAttribute(nomFor);
+			forum.addContent(topic);
+			racine.addContent(forum);
+		}
 		for (Post p : (ArrayList<Post>) l) {
 			Element post = new Element("post");
 			Attribute id = new Attribute("id", p.getId());
@@ -252,13 +280,13 @@ public class ExtractTopics {
 			Element parent = new Element("parent");
 			parent.setText(p.getParent());
 			post.addContent(parent);
-			
-			Attribute nomTopic = new Attribute("nom", p.getSujet());
-			topic.setAttribute(nomTopic);
+
 			topic.addContent(post);
-			
+
 		}
-		racine.addContent(topic);
+		Attribute nomTopic = new Attribute("nom", ((Post) l.get(0)).getSujet());
+		topic.setAttribute(nomTopic);
+		// racine.addContent(forum);
 		JDOMSource source = new JDOMSource(document);
 		StreamResult result = new StreamResult(filePath);
 		Transformer transformer = null;
@@ -293,6 +321,17 @@ public class ExtractTopics {
 			return idParent;
 		} else
 			return null;
+	}
+
+	public static String extractNomForum(String link) {
+		if (link != null) {
+			String nomForum = null;
+			String[] res = link.split(";");
+			nomForum = res[2];
+			return nomForum;
+		} else {
+			return null;
+		}
 	}
 
 }
