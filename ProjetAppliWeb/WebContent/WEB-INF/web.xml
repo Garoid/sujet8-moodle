@@ -11,12 +11,12 @@
   </welcome-file-list>
   <servlet>
     <description></description>
-    <display-name>SubDiscussionChecker</display-name>
-    <servlet-name>SubDiscussionChecker</servlet-name>
-    <servlet-class>servlet.SubDiscussionChecker</servlet-class>
+    <display-name>ForumHierarchyCrosser</display-name>
+    <servlet-name>ForumHierarchyCrosser</servlet-name>
+    <servlet-class>servlet.ForumHierarchyCrosser</servlet-class>
   </servlet>
   <servlet-mapping>
-    <servlet-name>SubDiscussionChecker</servlet-name>
-    <url-pattern>/SubDiscussionChecker</url-pattern>
+    <servlet-name>ForumHierarchyCrosser</servlet-name>
+    <url-pattern>/ForumHierarchyCrosser</url-pattern>
   </servlet-mapping>
 </web-app>
