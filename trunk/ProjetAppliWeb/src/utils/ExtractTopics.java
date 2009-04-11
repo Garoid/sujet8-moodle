@@ -35,8 +35,7 @@ public class ExtractTopics {
 
 	private static String nomForum = null;
 
-	public static void extractalltag(PrintWriter out, String adresse,
-			String filePath) {
+	public static void extractalltag(PrintWriter out, String adresse, String filePath) {
 		Parser parser = null;
 		AndFilter sujetFiltre = new AndFilter(new TagNameFilter("div"),
 				new HasAttributeFilter("class", "subject"));
@@ -102,8 +101,8 @@ public class ExtractTopics {
 			}
 			parser.reset();
 			list = parser.parse(nomForumFiltre);
-			nomForum = extractNomForum(
-					list.elementAt(list.size() - 2).toPlainTextString()).trim();
+//			nomForum = extractNomForum(list.elementAt(list.size() - 2).toPlainTextString()).trim();
+			nomForum = "forum1";
 			showAllPost(res, out);
 			writeAllPostToXml(res, filePath);
 		} catch (ParserException e) {
@@ -111,7 +110,7 @@ public class ExtractTopics {
 		}
 	}
 
-	public static String extractLinkParent(Node node) throws ParserException {
+	private static String extractLinkParent(Node node) throws ParserException {
 		if (node instanceof TagNode) {
 			TagNode tag = (TagNode) node;
 			if (tag instanceof LinkTag) {
@@ -127,12 +126,11 @@ public class ExtractTopics {
 		return null;
 	}
 
-	public static String extractLinkTagAttribute(Node node, String attribute)
+	private static String extractLinkTagAttribute(Node node, String attribute)
 			throws ParserException {
 		if (node instanceof TagNode) {
 
 			TagNode tag = (TagNode) node;
-			String tagName = tag.getTagName();
 			if (tag instanceof LinkTag) {
 				LinkTag link = (LinkTag) tag;
 				return link.getAttribute("id");
@@ -142,11 +140,10 @@ public class ExtractTopics {
 		return null;
 	}
 
-	public static String extractLinkTagText(Node node) throws ParserException {
+	private static String extractLinkTagText(Node node) throws ParserException {
 		if (node instanceof TagNode) {
 
 			TagNode tag = (TagNode) node;
-			String tagName = tag.getTagName();
 			if (tag instanceof LinkTag) {
 				LinkTag link = (LinkTag) tag;
 				return link.getLinkText();
@@ -156,7 +153,7 @@ public class ExtractTopics {
 		return null;
 	}
 
-	public static String extractNodeToHtml(Node node) throws ParserException {
+	private static String extractNodeToHtml(Node node) throws ParserException {
 		if (node instanceof TextNode) {
 
 			TextNode text = (TextNode) node;
@@ -190,7 +187,7 @@ public class ExtractTopics {
 		return null;
 	}
 
-	public static String extractTextNode(Node node) throws ParserException {
+	private static String extractTextNode(Node node) throws ParserException {
 		if (node instanceof TextNode) {
 
 			TextNode text = (TextNode) node;
@@ -210,7 +207,7 @@ public class ExtractTopics {
 		return null;
 	}
 
-	public static void showAllPost(List l, PrintWriter out) {
+	private static void showAllPost(List l, PrintWriter out) {
 		for (Post p : (ArrayList<Post>) l) {
 			out.println("Id: " + p.getId());
 			out.println("Auteur: " + p.getAuteur());
@@ -222,7 +219,7 @@ public class ExtractTopics {
 		}
 	}
 
-	public static void writeAllPostToXml(List l, String filePath) {
+	private static void writeAllPostToXml(List l, String filePath) {
 		File file = new File(filePath);
 		Document document = null;
 		Element racine = null;
@@ -305,7 +302,7 @@ public class ExtractTopics {
 		}
 	}
 
-	public static String extractDate(Node auteur) {
+	private static String extractDate(Node auteur) {
 		String date = null;
 		String ligne = auteur.toPlainTextString();
 		String[] res = ligne.split("-");
@@ -313,7 +310,7 @@ public class ExtractTopics {
 		return date;
 	}
 
-	public static String extractIdParent(String linkParent) {
+	private static String extractIdParent(String linkParent) {
 		if (linkParent != null) {
 			String idParent = null;
 			String[] res = linkParent.split("#");
@@ -323,7 +320,7 @@ public class ExtractTopics {
 			return null;
 	}
 
-	public static String extractNomForum(String link) {
+	private static String extractNomForum(String link) {
 		if (link != null) {
 			String nomForum = null;
 			String[] res = link.split(";");
