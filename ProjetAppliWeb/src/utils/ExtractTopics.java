@@ -25,9 +25,9 @@ import org.htmlparser.tags.LinkTag;
 import org.htmlparser.util.NodeIterator;
 import org.htmlparser.util.NodeList;
 import org.htmlparser.util.ParserException;
+import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
-import org.jdom.Attribute;
 import org.jdom.input.SAXBuilder;
 import org.jdom.transform.JDOMSource;
 
@@ -35,7 +35,8 @@ public class ExtractTopics {
 
 	private static String nomForum = null;
 
-	public static void extractalltag(PrintWriter out, String adresse, String filePath) {
+	public static void extractalltag(PrintWriter out, String adresse,
+			String filePath) {
 		Parser parser = null;
 		AndFilter sujetFiltre = new AndFilter(new TagNameFilter("div"),
 				new HasAttributeFilter("class", "subject"));
@@ -56,8 +57,6 @@ public class ExtractTopics {
 
 		try {
 			parser = new Parser(adresse);
-
-			// parser.setResource("file:///home/max06/localhost/moodle/mod/forum/discuss.php%3Fd=2");
 		} catch (ParserException e1) {
 			e1.printStackTrace();
 		}
@@ -101,8 +100,8 @@ public class ExtractTopics {
 			}
 			parser.reset();
 			list = parser.parse(nomForumFiltre);
-//			nomForum = extractNomForum(list.elementAt(list.size() - 2).toPlainTextString()).trim();
-			nomForum = "forum1";
+			nomForum = extractNomForum(
+					list.elementAt(list.size() - 2).toPlainTextString()).trim();
 			showAllPost(res, out);
 			writeAllPostToXml(res, filePath);
 		} catch (ParserException e) {

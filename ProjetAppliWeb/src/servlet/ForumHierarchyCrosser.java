@@ -24,8 +24,9 @@ import utils.ExtractTopics;
  */
 public class ForumHierarchyCrosser extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private final String pathToLocalForumFiles = "/home/vincent/wget";
+	private final String pathToLocalForumFiles = "/home/max06";
 	private String pathToLocalXmlFile = null;
+	
 
 	public ForumHierarchyCrosser() {
 		super();
@@ -34,7 +35,7 @@ public class ForumHierarchyCrosser extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String adresse = request.getParameter("adresse");
 //		pathToLocalXmlFile = this.getClass().getResource("/resources").getPath();
-		pathToLocalXmlFile = "/home/vincent/forum.xml";
+		pathToLocalXmlFile = "/home/max06/forum.xml";
 
 //		URL forumURL = new URL(adresse);
 //		Runtime run = Runtime.getRuntime();

@@ -12,6 +12,9 @@ Adresse du forum à extraire :
 <input type="text" name="adresse" value="file:///home/max06/localhost/moodle/mod/forum/view.php%3Ff=1"/>
 <input type="submit" value="Extaire"/>
 </form>
+<form method="get" action="XmlToRdf"> 
+<input type="submit" value="Export XML/RDF"/>
+</form>
 </p>
 </body>
 </html>

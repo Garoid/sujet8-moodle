@@ -19,4 +19,14 @@
     <servlet-name>ForumHierarchyCrosser</servlet-name>
     <url-pattern>/ForumHierarchyCrosser</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>XmlToRdf</display-name>
+    <servlet-name>XmlToRdf</servlet-name>
+    <servlet-class>servlet.XmlToRdf</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>XmlToRdf</servlet-name>
+    <url-pattern>/XmlToRdf</url-pattern>
+  </servlet-mapping>
 </web-app>
