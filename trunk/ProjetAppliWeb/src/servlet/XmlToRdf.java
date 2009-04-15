@@ -10,10 +10,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamSource;
 
 import org.jdom.Document;
+import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
@@ -59,8 +61,7 @@ public class XmlToRdf extends HttpServlet {
 		// TODO Auto-generated method stub
 	}
 
-	private void exportXmlToRdf(String rootPath, String fichierXSL,
-			String outputFilePath, PrintWriter out) {
+	private void exportXmlToRdf(String rootPath, String fichierXSL, String outputFilePath, PrintWriter out) {
 		JDOMResult documentJDOMSortie = new JDOMResult();
 		Document resultat = null;
 		Document document = null;
@@ -69,27 +70,26 @@ public class XmlToRdf extends HttpServlet {
 		if (!file.exists()) {
 			out.println("La création du fichier RDF ne peut pas se faire car Le fichier XML n'existe pas.");
 		} else {
-			try {
-				document = sxb.build(file);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
-				TransformerFactory factory = TransformerFactory.newInstance();
-				Transformer transformer = factory
-						.newTransformer(new StreamSource(fichierXSL));
-				transformer.transform(new JDOMSource(document),
-						documentJDOMSortie);
-				resultat = documentJDOMSortie.getDocument();
+				try {
+					document = sxb.build(file);
+					TransformerFactory factory = TransformerFactory.newInstance();
+					Transformer transformer = factory.newTransformer(new StreamSource(fichierXSL));
+					transformer.transform(new JDOMSource(document),documentJDOMSortie);
+					resultat = documentJDOMSortie.getDocument();
+					XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
+					outputter.output(resultat, new FileOutputStream(outputFilePath));
+					out.println("Votre fichier RDF a été créé.");
+				} catch (JDOMException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (TransformerException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 
-				XMLOutputter outputter = new XMLOutputter(Format
-						.getPrettyFormat());
-				outputter
-						.output(resultat, new FileOutputStream(outputFilePath));
-				out.println("Votre fichier RDF a été créé.");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
 		}
 	}
 

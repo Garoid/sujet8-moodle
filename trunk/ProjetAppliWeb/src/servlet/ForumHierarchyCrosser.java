@@ -1,5 +1,6 @@
 package servlet;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -18,24 +19,28 @@ import org.htmlparser.util.NodeList;
 import org.htmlparser.util.ParserException;
 
 import utils.ExtractTopics;
+import utils.HtmlResponseBuilder;
 
 /**
  * Servlet implementation class SubDiscussionChecker
  */
 public class ForumHierarchyCrosser extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private final String pathToLocalForumFiles = "/home/max06";
+	private final String pathToLocalForumFiles = "/home/vincent/wget";
 	private String pathToLocalXmlFile = null;
 	
 
+	/**
+	 * 
+	 */
 	public ForumHierarchyCrosser() {
 		super();
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String adresse = request.getParameter("adresse");
-//		pathToLocalXmlFile = this.getClass().getResource("/resources").getPath();
-		pathToLocalXmlFile = "/home/max06/forum.xml";
+//		pathToLocalXmlFile = this.getClass().getResource("/resources/xmlMoodle.xml").getPath();
+		pathToLocalXmlFile = "/home/vincent/forum.xml";
 
 //		URL forumURL = new URL(adresse);
 //		Runtime run = Runtime.getRuntime();
@@ -57,6 +62,9 @@ public class ForumHierarchyCrosser extends HttpServlet {
 		} catch (ParserException e) {
 			e.printStackTrace();
 		}
+		File xmlFile = new File(pathToLocalXmlFile);
+		if(xmlFile.exists())
+			HtmlResponseBuilder.returnResult(xmlFile, out);
 	}
 
 	
@@ -80,7 +88,6 @@ public class ForumHierarchyCrosser extends HttpServlet {
 					int index = adresse.lastIndexOf("/");
 					String newURL = adresse.substring(0, index+1);
 					newURL += subForumPageName;
-					System.out.println(newURL);
 					if(! verifySubDiscussionsExistence(formatHtmlURL(newURL), out))
 						/*cas particulier où le forum pointe directement sur une 
 						 * file de discussion et non sur une liste de files de discussion */
@@ -105,7 +112,6 @@ public class ForumHierarchyCrosser extends HttpServlet {
 				for (int i = 0; i < topicStarters.size(); i++) {
 					TagNode linkNode = (TagNode) topicStarters.elementAt(i).getChildren().elementAt(0);
 					String hrefSubDiscussion = linkNode.getAttribute("href");
-					System.out.println(hrefSubDiscussion);
 					ExtractTopics.extractalltag(out, formatHtmlURL(hrefSubDiscussion), pathToLocalXmlFile);
 				}
 			}
