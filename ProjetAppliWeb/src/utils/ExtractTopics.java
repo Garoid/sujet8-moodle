@@ -1,6 +1,7 @@
 package utils;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,7 @@ import org.htmlparser.util.ParserException;
 import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 import org.jdom.transform.JDOMSource;
 
@@ -35,8 +37,7 @@ public class ExtractTopics {
 
 	private static String nomForum = null;
 
-	public static void extractalltag(PrintWriter out, String adresse,
-			String filePath) {
+	public static void extractalltag(PrintWriter out, String adresse,String filePath) {
 		Parser parser = null;
 		AndFilter sujetFiltre = new AndFilter(new TagNameFilter("div"),
 				new HasAttributeFilter("class", "subject"));
@@ -100,9 +101,8 @@ public class ExtractTopics {
 			}
 			parser.reset();
 			list = parser.parse(nomForumFiltre);
-			nomForum = extractNomForum(
-					list.elementAt(list.size() - 2).toPlainTextString()).trim();
-			showAllPost(res, out);
+			nomForum = extractNomForum(list.elementAt(list.size() - 2).toPlainTextString()).trim();
+//			showAllPost(res, out);
 			writeAllPostToXml(res, filePath);
 		} catch (ParserException e) {
 			e.printStackTrace();
@@ -188,11 +188,9 @@ public class ExtractTopics {
 
 	private static String extractTextNode(Node node) throws ParserException {
 		if (node instanceof TextNode) {
-
 			TextNode text = (TextNode) node;
 			return text.getText();
 		} else if (node instanceof TagNode) {
-
 			TagNode tag = (TagNode) node;
 			NodeList nl = tag.getChildren();
 			if (null != nl)
@@ -201,12 +199,11 @@ public class ExtractTopics {
 						return extractTextNode(i.nextNode());
 					}
 				}
-
 		}
 		return null;
 	}
 
-	private static void showAllPost(List l, PrintWriter out) {
+	private static void showAllPost(List<Post> l, PrintWriter out) {
 		for (Post p : (ArrayList<Post>) l) {
 			out.println("Id: " + p.getId());
 			out.println("Auteur: " + p.getAuteur());
@@ -218,34 +215,40 @@ public class ExtractTopics {
 		}
 	}
 
-	private static void writeAllPostToXml(List l, String filePath) {
+	private static void writeAllPostToXml(List<Post> l, String filePath) {
 		File file = new File(filePath);
 		Document document = null;
 		Element racine = null;
 		Element forum = null;
-		List listChild = null;
+		List<Element> listChild = null;
 		Boolean nomForumExist = false;
 
+		SAXBuilder sxb = new SAXBuilder();
+		
 		if (!file.exists()) {
 			racine = new Element("moodle");
 			document = new Document(racine);
+			
+		} else {
+			try {
+				document = sxb.build(new File(filePath));
+				racine = document.getRootElement();
+			} catch (JDOMException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-		SAXBuilder sxb = new SAXBuilder();
-		try {
-			document = sxb.build(new File(filePath));
-		} catch (Exception e) {
-		}
-		racine = document.getRootElement();
+		
 		Element topic = new Element("topic");
 		listChild = racine.getChildren("forum");
 		for (int i = 0; i < listChild.size(); i++) {
-			if (((Element) listChild.get(i)).getAttributeValue("name").equals(
-					nomForum)) {
+			if (((Element) listChild.get(i)).getAttributeValue("name").equals(nomForum)) {
 				nomForumExist = true;
 				forum = ((Element) listChild.get(i));
 				forum.addContent(topic);
-				racine.removeChild(((Element) listChild.get(i)).getName());
-				racine.addContent(forum);
 				break;
 			}
 		}
@@ -256,7 +259,7 @@ public class ExtractTopics {
 			forum.addContent(topic);
 			racine.addContent(forum);
 		}
-		for (Post p : (ArrayList<Post>) l) {
+		for (Post p : (ArrayList<Post>)l) {
 			Element post = new Element("post");
 			Attribute id = new Attribute("id", p.getId());
 			post.setAttribute(id);
@@ -290,13 +293,10 @@ public class ExtractTopics {
 			transformer = TransformerFactory.newInstance().newTransformer();
 			transformer.transform(source, result);
 		} catch (TransformerConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (TransformerFactoryConfigurationError e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
