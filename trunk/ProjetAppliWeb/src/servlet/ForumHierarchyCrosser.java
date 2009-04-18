@@ -26,10 +26,9 @@ import utils.HtmlResponseBuilder;
  */
 public class ForumHierarchyCrosser extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private final String pathToLocalForumFiles = "/home/vincent/wget";
+	private final String pathToLocalForumFiles = "/home/max06/";
 	private String pathToLocalXmlFile = null;
 	
-
 	/**
 	 * 
 	 */
@@ -39,8 +38,12 @@ public class ForumHierarchyCrosser extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String adresse = request.getParameter("adresse");
-//		pathToLocalXmlFile = this.getClass().getResource("/resources/xmlMoodle.xml").getPath();
-		pathToLocalXmlFile = "/home/vincent/forum.xml";
+		pathToLocalXmlFile = this.getClass().getResource("/resources").getPath();
+		pathToLocalXmlFile += "/forum.xml";
+		File ficXml = new File(pathToLocalXmlFile);
+		if(ficXml.exists()){
+			ficXml.delete();
+		}
 
 //		URL forumURL = new URL(adresse);
 //		Runtime run = Runtime.getRuntime();
@@ -56,7 +59,7 @@ public class ForumHierarchyCrosser extends HttpServlet {
 		try {
 			if(! verifySubForumsExistence(adresse, out)) {
 				if(! verifySubDiscussionsExistence(adresse, out)) {
-					ExtractTopics.extractalltag(out, adresse, pathToLocalXmlFile);
+					ExtractTopics.extractalltag(out, adresse, pathToLocalXmlFile, false);
 				}
 			}
 		} catch (ParserException e) {
@@ -69,6 +72,7 @@ public class ForumHierarchyCrosser extends HttpServlet {
 
 	
 	protected void doPost(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {
+		doGet(request, response);
 	}
 	
 	private boolean verifySubForumsExistence(String adresse, PrintWriter out) throws ParserException {
@@ -91,7 +95,7 @@ public class ForumHierarchyCrosser extends HttpServlet {
 					if(! verifySubDiscussionsExistence(formatHtmlURL(newURL), out))
 						/*cas particulier où le forum pointe directement sur une 
 						 * file de discussion et non sur une liste de files de discussion */
-						ExtractTopics.extractalltag(out, formatHtmlURL(newURL), pathToLocalXmlFile);
+						ExtractTopics.extractalltag(out, formatHtmlURL(newURL), pathToLocalXmlFile, true);
 				}
 			}
 			return true;
@@ -112,7 +116,7 @@ public class ForumHierarchyCrosser extends HttpServlet {
 				for (int i = 0; i < topicStarters.size(); i++) {
 					TagNode linkNode = (TagNode) topicStarters.elementAt(i).getChildren().elementAt(0);
 					String hrefSubDiscussion = linkNode.getAttribute("href");
-					ExtractTopics.extractalltag(out, formatHtmlURL(hrefSubDiscussion), pathToLocalXmlFile);
+					ExtractTopics.extractalltag(out, formatHtmlURL(hrefSubDiscussion), pathToLocalXmlFile, false);
 				}
 			}
 			return true;
