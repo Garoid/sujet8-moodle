@@ -3,21 +3,25 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script src=\"http://code.jquery.com/jquery-latest.js\"></script>
-<title>Moodle Forum Extractor</title>
 <link href="css/design.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="ajaxExtract.js"></script>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<title>Moodle Forum Extractor</title>
 </head>
 <body>
 <div><center><img src="img/moodle2.jpg"> </center></div>
 <p>
-Adresse du forum à extraire :
-<form method="get" action="ForumHierarchyCrosser">
+<form action="CopyFile" method="get">
+<input type="submit" value="Copie de fichier">
 <input type="text" id="adresse" name="adresse" value="file:///home/max06/localhost/moodle/mod/forum/index.php%3Fid=2" />
-<input type="submit" value="Extaire"/>
 </form>
 </p>
-<div id="results">
-        
+<p>
+Adresse du forum à extraire :
+<input type="text" id="adresse" name="adresse" value="file:///home/max06/localhost/moodle/mod/forum/index.php%3Fid=2" />
+<input type="button" value="Extaire" onclick="extract()"/>
+</p>
+<div id="results">    
 </div>
 </body>
 </html>
