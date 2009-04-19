@@ -29,4 +29,14 @@
     <servlet-name>XmlToRdf</servlet-name>
     <url-pattern>/XmlToRdf</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>CopyFile</display-name>
+    <servlet-name>CopyFile</servlet-name>
+    <servlet-class>servlet.CopyFile</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>CopyFile</servlet-name>
+    <url-pattern>/CopyFile</url-pattern>
+  </servlet-mapping>
 </web-app>

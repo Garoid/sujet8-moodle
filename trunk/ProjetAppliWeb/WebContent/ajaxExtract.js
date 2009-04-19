@@ -1,10 +1,9 @@
 
 var req;
-function search(){
+function extract(){
 
 	var adresse = document.getElementById("adresse");
 	var url = "ForumHierarchyCrosser?adresse="+ adresse.value;
-	var url2 = "ForumHierarchyCrosser?adresse=file:///home/max06/localhost/moodle/mod/forum/view.php%3Ff=1";
 	//alert(url);
 	req = new XMLHttpRequest();
 	req.onreadystatechange = callback;

@@ -55,6 +55,7 @@ public class ForumHierarchyCrosser extends HttpServlet {
 //		run.exec(" wget -r -np -l inf --load-cookies " +cookiesPath + " " +forumURL, null , wgetResultFile);
 		
 		PrintWriter out = response.getWriter();
+		response.setContentType("text/html");
 		
 		try {
 			if(! verifySubForumsExistence(adresse, out)) {
