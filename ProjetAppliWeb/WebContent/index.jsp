@@ -11,12 +11,6 @@
 <body>
 <div><center><img src="img/moodle2.jpg"> </center></div>
 <p>
-<form action="CopyFile" method="get">
-<input type="submit" value="Copie de fichier">
-<input type="text" id="adresse" name="adresse" value="file:///home/max06/localhost/moodle/mod/forum/index.php%3Fid=2" />
-</form>
-</p>
-<p>
 Adresse du forum à extraire :
 <input type="text" id="adresse" name="adresse" value="file:///home/max06/localhost/moodle/mod/forum/index.php%3Fid=2" />
 <input type="button" value="Extaire" onclick="extract()"/>

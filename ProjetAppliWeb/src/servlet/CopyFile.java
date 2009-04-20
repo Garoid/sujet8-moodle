@@ -34,24 +34,51 @@ public class CopyFile extends HttpServlet {
 		// TODO Auto-generated method stub
 		String adresse = request.getParameter("adresse");
 		String adresseFormat = null;
-//		System.out.println("adresse:" + adresse);
-		adresseFormat = formatHtmlURL(adresse);
-//		System.out.println("adresse formaté :" + adresseFormat);
-		String adresseFile = adresseFormat.substring(7, adresseFormat
-				.lastIndexOf(""));
-		String adresseNewFile = adresseFormat.substring(7, adresseFormat
-				.lastIndexOf("?"));
-//		System.out.println("adresse du file :" + adresseFile);
-//		System.out.println("adresse du new File :" + adresseNewFile);
+		adresseFormat = formatURL(adresse);
+		String adresseFile = null;
+		String adresseNewFile = null;
+		
+		if (adresseFormat.contains("file:///")) {
+			adresseFile = adresseFormat.substring(7, adresseFormat
+					.lastIndexOf(""));
+			adresseNewFile = adresseFormat.substring(7, adresseFormat
+					.lastIndexOf("?"));
+		} else if (adresseFormat.contains("http://")) {
+			if (adresseFormat.contains("www.")) {
+				adresseFile = adresseFormat.substring(11, adresseFormat
+						.lastIndexOf(""));
+				adresseNewFile = adresseFormat.substring(11, adresseFormat
+						.lastIndexOf("?"));
+				adresseFile = "/" + adresseFile;
+				adresseNewFile = "/" + adresseNewFile;
+
+			} else {
+
+				adresseFile = adresseFormat.substring(6, adresseFormat
+						.lastIndexOf(""));
+				adresseNewFile = adresseFormat.substring(6, adresseFormat
+						.lastIndexOf("?"));
+			}
+		} else {
+			if (adresseFormat.contains("www.")) {
+				adresseFile = adresseFormat.substring(4, adresseFormat
+						.lastIndexOf(""));
+				adresseNewFile = adresseFormat.substring(4, adresseFormat
+						.lastIndexOf("?"));
+				adresseFile = "/" + adresseFile;
+				adresseNewFile = "/" + adresseNewFile;
+			}
+		}
+
 		File file = new File(adresseFile);
 		File newFile = new File(adresseNewFile);
-//		System.out.println("exsitance du fichier : " + file.exists());
+		System.out.println("exsitance du fichier : " + file.exists());
 		Boolean res1 = copyFile(adresseFile, adresseNewFile);
 		System.out.println("copie reussi : " + res1);
 
 	}
 
-	private String formatHtmlURL(String url) {
+	private String formatURL(String url) {
 		String urlRes = url;
 		if (url.contains("%3F")) {
 			urlRes = url.replaceAll("%3F", "\\?");
