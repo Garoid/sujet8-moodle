@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.transform.Transformer;
@@ -30,15 +31,16 @@ import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
+import org.jdom.filter.ElementFilter;
 import org.jdom.input.SAXBuilder;
 import org.jdom.transform.JDOMSource;
 
 public class ExtractTopics {
 
 	private static String nomForum = null;
-
-	public static void extractalltag(PrintWriter out, String adresse,
-			String filePath, boolean forumIsTopic ) {
+	private static String topicName = null;
+	
+	public static void extractalltag(PrintWriter out, String adresse,String filePath, ArrayList<String> oldPostsId, boolean forumIsTopic) {
 		Parser parser = null;
 		AndFilter sujetFiltre = new AndFilter(new TagNameFilter("div"),
 				new HasAttributeFilter("class", "subject"));
@@ -65,40 +67,53 @@ public class ExtractTopics {
 		try {
 			List<Post> res = new ArrayList<Post>();
 			NodeList list = parser.parse(sujetFiltre);
+			Node tmp = list.elementAt(0);
+			topicName = extractTextNode(tmp);
+			
+			boolean postListNull = (oldPostsId == null);
 			for (int i = 0; i < list.size(); i++) {
-				Node tmp = list.elementAt(i);
-				String sujet = extractTextNode(tmp);
+				
 				parser.reset();
-
-				list = parser.parse(messageFiltre);
-				Node tmp2 = list.elementAt(i);
-				String message = extractNodeToHtml(tmp2);
-				parser.reset();
-
-				list = parser.parse(auteurFiltre);
-				Node tmp3 = list.elementAt(i);
-				String auteur = extractLinkTagText(tmp3);
-				parser.reset();
-
-				list = parser.parse(divAuteur);
-				Node tmp4 = list.elementAt(i);
-				String date = extractDate(tmp4);
-				parser.reset();
-
 				list = parser.parse(idFiltre);
 				Node tmp5 = list.elementAt(i);
 				String id = extractLinkTagAttribute(tmp5, "id");
 				parser.reset();
+				
+				if(postListNull || (! oldPostsId.contains(id))) {
 
-				list = parser.parse(divCommands);
-				Node tmp6 = list.elementAt(i);
-				String linkParent = extractLinkParent(tmp6.getFirstChild());
-				String parent = extractIdParent(linkParent);
-				parser.reset();
+					list = parser.parse(messageFiltre);
+					Node tmp2 = list.elementAt(i);
+					String message = extractNodeToHtml(tmp2);
+					parser.reset();
 
-				list = parser.parse(sujetFiltre);
-				Post p = new Post(id, sujet, auteur, message, date, parent);
-				res.add(p);
+					list = parser.parse(auteurFiltre);
+					Node tmp3 = list.elementAt(i);
+					String auteur = extractLinkTagText(tmp3);
+					parser.reset();
+					
+					list = parser.parse(divAuteur);
+					Node tmp4 = list.elementAt(i);
+					String date = extractDate(tmp4);
+					parser.reset();
+
+					list = parser.parse(divCommands);
+					Node tmp6 = list.elementAt(i);
+					String linkParent = extractLinkParent(tmp6.getFirstChild());
+					String parent = extractIdParent(linkParent);
+					parser.reset();
+					
+					String idPostPrec = null;
+					if(i>0){
+						list = parser.parse(idFiltre);
+						Node tmp7 = list.elementAt(i-1);
+						idPostPrec = extractLinkTagAttribute(tmp7, "id");
+						parser.reset();
+					}
+
+					list = parser.parse(idFiltre);
+					Post p = new Post(id, auteur, message, date, parent, idPostPrec);
+					res.add(p);
+				}
 			}
 			parser.reset();
 			list = parser.parse(nomForumFiltre);
@@ -110,12 +125,13 @@ public class ExtractTopics {
 				nomForum = extractNomForum(
 						list.elementAt(list.size() - 2).toPlainTextString()).trim();
 			}
-			// showAllPost(res, out);
-			writeAllPostToXml(res, filePath);
+			if(res.size() > 0)
+				writeAllPostToXml(res, filePath);
 		} catch (ParserException e) {
 			e.printStackTrace();
 		}
 	}
+	
 
 	private static String extractLinkParent(Node node) throws ParserException {
 		if (node instanceof TagNode) {
@@ -211,90 +227,73 @@ public class ExtractTopics {
 		return null;
 	}
 
-	private static void showAllPost(List<Post> l, PrintWriter out) {
-		for (Post p : (ArrayList<Post>) l) {
-			out.println("Id: " + p.getId());
-			out.println("Auteur: " + p.getAuteur());
-			out.println("Date: " + p.getDate());
-			out.println("topic: " + p.getSujet());
-			out.println("message: " + p.getMessage());
-			out.println("parent: " + p.getParent());
-			out.println();
-		}
-	}
-
-	private static void writeAllPostToXml(List<Post> l, String filePath) {
+	private static void writeAllPostToXml(List<Post> newPost, String filePath) {
 		File file = new File(filePath);
 		Document document = null;
 		Element racine = null;
 		Element forum = null;
 		List<Element> listChild = null;
-		Boolean nomForumExist = false;
+		boolean forumExist = false;
+		boolean topicExist = false;
 
 		SAXBuilder sxb = new SAXBuilder();
-
+		
 		if (!file.exists()) {
 			racine = new Element("moodle");
 			document = new Document(racine);
-
+			
 		} else {
 			try {
 				document = sxb.build(new File(filePath));
 				racine = document.getRootElement();
 			} catch (JDOMException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-
-		Element topic = new Element("topic");
+		
 		listChild = racine.getChildren("forum");
 		for (int i = 0; i < listChild.size(); i++) {
-			if (((Element) listChild.get(i)).getAttributeValue("name").equals(
-					nomForum)) {
-				nomForumExist = true;
+			if (((Element) listChild.get(i)).getAttributeValue("nom").equals(nomForum)) {
+				forumExist = true;
 				forum = ((Element) listChild.get(i));
-				forum.addContent(topic);
 				break;
 			}
 		}
-		if (!nomForumExist) {
+		Element topic = null;
+		if (!forumExist) {
 			forum = new Element("forum");
-			Attribute nomFor = new Attribute("name", nomForum);
+			Attribute nomFor = new Attribute("nom", nomForum);
 			forum.setAttribute(nomFor);
+			topic = new Element("topic");
+			topic.setAttribute("nom", topicName);
 			forum.addContent(topic);
 			racine.addContent(forum);
+		} else {
+			//on récupère l'élement topic s'il existe déjà
+			listChild = forum.getChildren("topic");
+			for (int i = 0; i < listChild.size(); i++) {
+				if (((Element) listChild.get(i)).getAttributeValue("nom").equals(topicName)) {
+					topicExist = true;
+					topic = ((Element) listChild.get(i));
+					break;
+				}
+			}
+			if (!topicExist) {
+				topic = new Element("topic");
+				topic.setAttribute("nom", topicName);
+				forum.addContent(topic);
+			}
 		}
-		for (Post p : (ArrayList<Post>) l) {
-			Element post = new Element("post");
-			Attribute id = new Attribute("id", p.getId());
-			post.setAttribute(id);
-
-			Element auteur = new Element("auteur");
-			auteur.setText(p.getAuteur());
-			post.addContent(auteur);
-
-			Element date = new Element("date");
-			date.setText(p.getDate());
-			post.addContent(date);
-
-			Element message = new Element("message");
-			message.setText(p.getMessage());
-			post.addContent(message);
-
-			Element parent = new Element("parent");
-			parent.setText(p.getParent());
-			post.addContent(parent);
-
-			topic.addContent(post);
-
+		for (Post p : (ArrayList<Post>)newPost) {
+			Element post = createPostElement(p);
+			if((!forumExist) || (!topicExist) || (p.getIdPostPrec() == null))
+				topic.addContent(post);
+			else {				
+				topic.addContent(getPrecPostIndex(topic, p.getIdPostPrec())+1, post);
+			}
 		}
-		Attribute nomTopic = new Attribute("nom", ((Post) l.get(0)).getSujet());
-		topic.setAttribute(nomTopic);
-		// racine.addContent(forum);
 		JDOMSource source = new JDOMSource(document);
 		StreamResult result = new StreamResult(filePath);
 		Transformer transformer = null;
@@ -317,7 +316,7 @@ public class ExtractTopics {
 		date = res[1];
 		return date;
 	}
-
+	
 	private static String extractIdParent(String linkParent) {
 		if (linkParent != null) {
 			String idParent = null;
@@ -337,6 +336,67 @@ public class ExtractTopics {
 		} else {
 			return null;
 		}
+	}
+	
+	private static Element createPostElement(Post p) {
+		Element post = new Element("post");
+		Attribute id = new Attribute("id", p.getId());
+		post.setAttribute(id);
+
+		Element auteur = new Element("auteur");
+		auteur.setText(p.getAuteur());
+		post.addContent(auteur);
+
+		Element date = new Element("date");
+		date.setText(p.getDate());
+		post.addContent(date);
+
+		Element message = new Element("message");
+		message.setText(p.getMessage());
+		post.addContent(message);
+
+		Element parent = new Element("parent");
+		parent.setText(p.getParent());
+		post.addContent(parent);
+		
+		return post;
+	}
+	
+	public static ArrayList<String> getOldXmlPosts(String xmlFilePath) {
+		File file = new File(xmlFilePath);
+		if(! file.exists())
+			return null;
+		SAXBuilder sxb = new SAXBuilder();
+		Document doc = null;
+		try {
+			doc = sxb.build(file);
+		} catch (JDOMException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Element racine = doc.getRootElement();
+		ArrayList<String> oldPosts = new ArrayList<String>();
+		Iterator<Element> it = racine.getDescendants(new ElementFilter("post"));
+		if(! it.hasNext())
+			return null;
+		while(it.hasNext()){
+			Element post = (Element) it.next();
+			String postId = post.getAttributeValue("id");
+			oldPosts.add(postId);
+		}
+		return oldPosts;
+	}
+	
+	private static int getPrecPostIndex(Element topic, String idPrecPost) {
+		List<Element> topicChildren = topic.getChildren("post");
+		for(int i=0; i<topicChildren.size(); i++) {
+			String currentId = topicChildren.get(i).getAttribute("id").getValue();
+			//on cherche l'index du parent avec son ID
+			if(currentId.equals(idPrecPost))
+				return i;
+		}
+		return -1;
 	}
 
 }

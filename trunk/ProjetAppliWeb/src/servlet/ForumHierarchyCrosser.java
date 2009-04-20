@@ -3,6 +3,8 @@ package servlet;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URL;
+import java.util.ArrayList;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -26,8 +28,9 @@ import utils.HtmlResponseBuilder;
  */
 public class ForumHierarchyCrosser extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private final String pathToLocalForumFiles = "/home/max06/";
-	private String pathToLocalXmlFile = null;
+	private String pathToLocalForumFiles		= null;
+	private String pathToLocalXmlFile 			= null;
+	private ArrayList<String> oldPostsId 		= new ArrayList<String>();
 	
 	/**
 	 * 
@@ -38,29 +41,28 @@ public class ForumHierarchyCrosser extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String adresse = request.getParameter("adresse");
+		pathToLocalForumFiles = "/home/vincent/wget";
 		pathToLocalXmlFile = this.getClass().getResource("/resources").getPath();
-		pathToLocalXmlFile += "/forum.xml";
-		File ficXml = new File(pathToLocalXmlFile);
-		if(ficXml.exists()){
-			ficXml.delete();
-		}
+		pathToLocalXmlFile += "/"+getSiteWebName(adresse)+".xml";
+		
+		//		pathToLocalForumFiles = this.getClass().getResource("/resources/wget").getPath();
 
 //		URL forumURL = new URL(adresse);
 //		Runtime run = Runtime.getRuntime();
-//		String cookiesPath =
-//		this.getClass().getResource("/resources/cookies.txt").getPath();
-//		File wgetResultFile = new
-//		File(this.getClass().getResource("/resources/wgetExtract").getPath());
+//		String cookiesPath = this.getClass().getResource("/resources/cookies.txt").getPath();
 //		File wgetResultFile = new File(pathToLocalForumFiles);
-//		run.exec(" wget -r -np -l inf --load-cookies " +cookiesPath + " " +forumURL, null , wgetResultFile);
+//		run.exec("wget -r -np --load-cookies " +cookiesPath + " " +forumURL, null , wgetResultFile);
+//		
+//		System.out.println("Wget terminé");
 		
+		oldPostsId = ExtractTopics.getOldXmlPosts(pathToLocalXmlFile);
 		PrintWriter out = response.getWriter();
 		response.setContentType("text/html");
 		
 		try {
 			if(! verifySubForumsExistence(adresse, out)) {
 				if(! verifySubDiscussionsExistence(adresse, out)) {
-					ExtractTopics.extractalltag(out, adresse, pathToLocalXmlFile, false);
+					ExtractTopics.extractalltag(out, adresse, pathToLocalXmlFile, oldPostsId, false);
 				}
 			}
 		} catch (ParserException e) {
@@ -96,7 +98,7 @@ public class ForumHierarchyCrosser extends HttpServlet {
 					if(! verifySubDiscussionsExistence(formatHtmlURL(newURL), out))
 						/*cas particulier où le forum pointe directement sur une 
 						 * file de discussion et non sur une liste de files de discussion */
-						ExtractTopics.extractalltag(out, formatHtmlURL(newURL), pathToLocalXmlFile, true);
+						ExtractTopics.extractalltag(out, formatHtmlURL(newURL), pathToLocalXmlFile, oldPostsId, true);
 				}
 			}
 			return true;
@@ -117,7 +119,7 @@ public class ForumHierarchyCrosser extends HttpServlet {
 				for (int i = 0; i < topicStarters.size(); i++) {
 					TagNode linkNode = (TagNode) topicStarters.elementAt(i).getChildren().elementAt(0);
 					String hrefSubDiscussion = linkNode.getAttribute("href");
-					ExtractTopics.extractalltag(out, formatHtmlURL(hrefSubDiscussion), pathToLocalXmlFile, false);
+					ExtractTopics.extractalltag(out, formatHtmlURL(hrefSubDiscussion), pathToLocalXmlFile, oldPostsId, false);
 				}
 			}
 			return true;
@@ -129,5 +131,19 @@ public class ForumHierarchyCrosser extends HttpServlet {
 		String formatedURL = url.replaceFirst("http://", "file://" + pathToLocalForumFiles + "/");
 		formatedURL = formatedURL.replaceAll("\\?", "%3F");
 		return formatedURL;
+	}
+	
+	private String getSiteWebName(String adresse) {
+		String res = adresse;
+		if(adresse.contains("http://"))
+			res = adresse.substring("http://".length());
+		if(adresse.contains("file://"+pathToLocalForumFiles+"/"))
+			res = adresse.substring(("file://"+pathToLocalForumFiles +"/").length());
+		int indexSlash = res.indexOf("/");
+		int indexWWW = 0;
+		if(res.contains("www."))				
+			indexWWW = res.indexOf("www.")+4;
+		res = res.substring(indexWWW, indexSlash);
+		return res;
 	}
 }

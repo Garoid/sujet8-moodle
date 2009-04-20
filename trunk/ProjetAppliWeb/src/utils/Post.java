@@ -3,24 +3,24 @@ package utils;
 public class Post {
 
 	private String id;
-	private String sujet;
 	private String auteur;
 	private String message;
 	private String date;
 	private String parent;
-
+	private String idPostPrec;
+	
 	public Post() {
 	}
 
-	public Post(String id, String sujet, String auteur, String message,
-			String date, String parent) {
+	public Post(String id, String auteur, String message,
+			String date, String parent, String idPostPrec) {
 		super();
 		this.id = id;
-		this.sujet = sujet;
 		this.auteur = auteur;
 		this.message = message;
 		this.date = date;
 		this.parent = parent;
+		this.idPostPrec = idPostPrec;
 	}
 
 	public String getId() {
@@ -63,12 +63,8 @@ public class Post {
 		this.parent = parent;
 	}
 
-	public String getSujet() {
-		return sujet;
-	}
-
-	public void setSujet(String sujet) {
-		this.sujet = sujet;
+	public String getIdPostPrec() {
+		return idPostPrec;
 	}
 
 }

@@ -3,6 +3,7 @@ package utils;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.List;
 
 import org.jdom.Document;
@@ -14,8 +15,8 @@ import servlet.ForumHierarchyCrosser;
 
 public class HtmlResponseBuilder {
 	
-	private static int idForum = 1;
-	private static int idTopic = 200;
+	private static int idForum = (int)Math.random() * 1000000;
+	private static int idTopic = (int)(Math.random() + 1000000) * 200;
 	
 	public static void returnResult(File xmlFile, PrintWriter out ) {
 		SAXBuilder sxb = new SAXBuilder();
@@ -36,16 +37,15 @@ public class HtmlResponseBuilder {
 		out.println(".nomTopic{background-color:black; color:white; width:50%; margin:auto; }");
 		out.println(".post{color:red; font-weight: bold;}");
 		out.println("h1 {text-align:center;}");
-		out.println(" h3 {text-align:center; color:red;}");
-		out.println("table {border:4px outset black; margin:auto; }");
-		out.println("th {background-color:black; color:white; padding:10px; }");
-		out.println("td {background-color: #CCCCCC; color:black; border:1px solid red; text-align:center; }");
+		out.println(".rdf{text-align:center; color:red;}");
+		out.println("table{border:4px outset black; margin:auto; width:50%;}");
+		out.println("td {background-color: #CCCCCC; color:black; border:1px solid red; text-align:left; }");
 		out.println("caption {font-size:1.2em; font-weight:bold; margin:auto auto 20px; color:red; }");
 		out.println("</style>");
 		
 		out.println("<h1>Resultat de votre extraction</h1>");
-		out.println("<h3>Exporter votre resultat en RDF :</h3><form method=\"get\" action=\"XmlToRdf\">" +
-				"<input type=\"submit\" value=\"Export XML/RDF\"/></form>");
+		out.println("<script type=\"text/javascript\" src=\"ajaxExtract.js\"></script>");
+		out.println("<div class=\"rdf\">Exporter votre resultat en RDF : </h3><input type=\"button\" value=\"Export XML/RDF\" onclick=\"exportXmlToRdf()\"/></div><br />");
 		out.println("<div class=\"listeForum\">");
 		Element root = doc.getRootElement();
 		List forumElements = root.getChildren("forum");
@@ -59,10 +59,9 @@ public class HtmlResponseBuilder {
 	}
 	
 	private static void addForum(Element forum, int idForum, PrintWriter out) {
-		String forumName = forum.getAttributeValue("name");
+		String forumName = forum.getAttributeValue("nom");
 		out.println("<div class=\"forum\">");
 		out.println("<p class=\"nomForum\" id=\""+idForum+"\" onclick=\"$('#"+idForum+"').siblings().slideToggle('slow')\">Forum: "+forumName+"</p>");
-		//System.out.println(forumName + "a pour id : " + idForum);
 		List topicElements = forum.getChildren("topic");
 		for(int i=0; i<topicElements.size(); i++){
 			addTopic((Element) topicElements.get(i),idTopic, out);
@@ -75,42 +74,48 @@ public class HtmlResponseBuilder {
 		String topicName = topic.getAttributeValue("nom");
 		out.println("<div class=\"topic\" style=\"display:none\" >");
 		out.println("<p class=\"nomTopic\" id=\""+idTopic+"\" onclick=\"$('#"+idTopic+"').siblings().slideToggle('slow')\">Topic: "+topicName+"</p>");
-		//System.out.println(topicName + " a pour id : "+idTopic);
 		
 		List postElements = topic.getChildren("post");
 		out.println("<div class=\"post\" style=\"display:none\" >");
 		out.println("<TABLE BORDER=\"1\">");
 		out.println("<caption>Tableau des posts</caption>");
-    	out.println("<TH> Id </TH>");
-    	out.println("<TH> Auteur </TH>");
-    	out.println("<TH> Date</TH>");
-    	out.println("<TH> Message </TH>");
-    	out.println("<TH> Repond a </TH>");
+    	HashMap<String, String[]> posts = new HashMap<String, String[]>();
 		
 		for(int i=0; i<postElements.size(); i++){
-			addPost((Element) postElements.get(i), out);
+			String[] tab = addPost((Element) postElements.get(i), out, posts);
+			String[] innerTab = {tab[1], tab[2]};
+			posts.put(tab[0], innerTab);
 		}
 		out.println("</table>");
 		out.println("</div>");
 		out.println("</div>");
 	}
 	
-	private static void addPost(Element post, PrintWriter out) {
+	private static String[] addPost(Element post, PrintWriter out, HashMap<String, String[]> precPost) {
 		String postId = post.getAttributeValue("id");
 		String postAuthor = post.getChildTextTrim("auteur");
 		String postDate = post.getChildTextTrim("date");
 		String postMessage = post.getChildTextTrim("message");
 		String postParent = post.getChildTextTrim("parent");
-		if(postParent.equals("")){
-			postParent = "Createur du post";
-		}
-		out.println("<tr>");
-		out.println("<td>"+postId+"</td>");
-		out.println("<td>"+postAuthor+"</td>");
-		out.println("<td>"+postDate+"</td>");
-		out.println("<td>"+postMessage+"</td>");
-		out.println("<td>"+postParent+"</td>");
-		out.println("</tr>");
 		
+		out.println("<table border=\"1\">");
+		out.println("<tr>");
+		out.println("<tr>");
+		out.println("<td>"+postAuthor+" le "+postDate);
+		if(! postParent.equals("")){
+			String[] infoParent = precPost.get(postParent);
+			out.println("<br />");
+			out.println("repond au post de " + infoParent[0] + " du " + infoParent[1]);
+		}
+		out.println("</td>");
+		out.println("</tr>");
+		out.println("<tr>");
+		out.println("<td>" + postMessage + "</td>");
+		out.println("</tr>");
+		out.println("</table>");
+		
+		
+		String[] tab = {postId, postAuthor, postDate};
+		return tab;
 	}
 }
