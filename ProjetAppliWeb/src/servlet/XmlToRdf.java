@@ -28,10 +28,10 @@ import org.jdom.transform.JDOMSource;
 public class XmlToRdf extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private final String pathToLocalXmlFile = this.getClass().getResource(
-			"/resources/forum.xml").getPath();
+			"/resources/localhost.xml").getPath();
 	private final String pathToLocalRdfFile = this.getClass().getResource(
 			"/resources").getPath()
-			+ "forumRdf.xml";
+			+ "localhostRdf.xml";
 	private final String pathToLocalXslFile = this.getClass().getResource(
 			"/resources/forum.xsl").getPath();
 
@@ -87,7 +87,7 @@ public class XmlToRdf extends HttpServlet {
 						.getPrettyFormat());
 				outputter
 						.output(resultat, new FileOutputStream(outputFilePath));
-				out.println("Votre fichier RDF a été créé.");
+				out.println("Votre fichier RDF a ete cree.");
 			} catch (JDOMException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

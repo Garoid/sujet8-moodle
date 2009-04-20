@@ -7,7 +7,7 @@ function extract(){
 	//alert(url);
 	req = new XMLHttpRequest();
 	req.onreadystatechange = callback;
-    req.open("POST",url,true);
+    req.open("get",url,true);
     req.send(null);
 }
 
@@ -26,14 +26,36 @@ function callback(){
     
 }
 
-var req2;
 function copyFile(){
 
 	var adresse = document.getElementById("adresse");
-	var url4 = "CopyFile?adresse="+ adresse.value;
+	var url = "CopyFile?adresse="+ adresse.value;
 	req = new XMLHttpRequest();
-    req.open("get",url4,true);
+    req.open("get",url,true);
     req.send(null);
+}
+
+function exportXmlToRdf(){
+
+	var url = "XmlToRdf";
+	req = new XMLHttpRequest();
+    req.open("get",url,true);
+    req.onreadystatechange = alert;
+    req.send(null);
+}
+
+function alert(){
+    if (req.readyState==4){
+        if (req.status == 200){
+            //it works:
+            alert('Fichier RDF cree');
+        }
+        else{
+            //problem:
+            alert('export failed');
+        }
+    }
+    
 }
 
 

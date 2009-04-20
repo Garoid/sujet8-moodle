@@ -12,7 +12,7 @@
 <div><center><img src="img/moodle2.jpg"> </center></div>
 <p>
 Adresse du forum à extraire :
-<input type="text" id="adresse" name="adresse" value="file:///home/max06/localhost/moodle/mod/forum/index.php%3Fid=2" />
+<input type="text" id="adresse" name="adresse" />
 <input type="button" value="Extaire" onclick="extract()"/>
 </p>
 <div id="results">    
