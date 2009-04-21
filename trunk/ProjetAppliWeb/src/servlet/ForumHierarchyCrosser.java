@@ -41,7 +41,7 @@ public class ForumHierarchyCrosser extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String adresse = request.getParameter("adresse");
-		pathToLocalForumFiles = "/home/vincent/wget";
+		pathToLocalForumFiles = "/home/max06";
 		pathToLocalXmlFile = this.getClass().getResource("/resources").getPath();
 		pathToLocalXmlFile += "/"+getSiteWebName(adresse)+".xml";
 		
