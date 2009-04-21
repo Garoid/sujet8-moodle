@@ -392,7 +392,7 @@ public class ExtractTopics {
 		List<Element> topicChildren = topic.getChildren("post");
 		for(int i=0; i<topicChildren.size(); i++) {
 			String currentId = topicChildren.get(i).getAttribute("id").getValue();
-			//on cherche l'index du parent avec son ID
+			//on cherche l'index du post precedent avec son ID
 			if(currentId.equals(idPrecPost))
 				return i;
 		}

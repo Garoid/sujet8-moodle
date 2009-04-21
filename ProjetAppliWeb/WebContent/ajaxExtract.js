@@ -40,15 +40,15 @@ function exportXmlToRdf(){
 	var url = "XmlToRdf";
 	req = new XMLHttpRequest();
     req.open("get",url,true);
-    req.onreadystatechange = alert;
+    req.onreadystatechange = afficherAlert;
     req.send(null);
 }
 
-function alert(){
+function afficherAlert(){
     if (req.readyState==4){
         if (req.status == 200){
             //it works:
-            alert('Fichier RDF cree');
+            alert(req.responseText);
         }
         else{
             //problem:
@@ -58,4 +58,11 @@ function alert(){
     
 }
 
-
+//function extract(){
+//	var adresse = document.getElementById("adresse");
+//	var div = document.getElementById('results');
+//	var url = "ForumHierarchyCrosser?adresse="+ adresse.value;
+//	$.get(url, function(data){
+//	    div.innerHTML = data;
+//	  });
+//}
