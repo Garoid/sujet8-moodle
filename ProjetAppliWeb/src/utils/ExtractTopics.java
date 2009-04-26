@@ -58,9 +58,14 @@ public class ExtractTopics {
 				new HasAttributeFilter("class", "commands"));
 		AndFilter nomForumFiltre = new AndFilter(new TagNameFilter("li"),
 				new HasAttributeFilter("class", "first"));
-
+		AndFilter isTopicFilter = new AndFilter(new TagNameFilter("body"),
+				new HasAttributeFilter("id", "mod-forum-discuss"));
+		
 		try {
 			parser = new Parser(adresse);
+//			// on vérifie que la page courante possède bien les propriété (HTML) d'un TOPIC
+//			if(parser.parse(isTopicFilter).size() == 0)
+//				return;
 		} catch (ParserException e1) {
 			e1.printStackTrace();
 		}
@@ -118,12 +123,10 @@ public class ExtractTopics {
 			parser.reset();
 			list = parser.parse(nomForumFiltre);
 			if(forumIsTopic){
-				nomForum = extractNomForum(
-						list.elementAt(list.size() - 1).toPlainTextString()).trim();
+				nomForum = extractNomForum(list.elementAt(list.size() - 1).toPlainTextString()).trim();
 			}
 			else{
-				nomForum = extractNomForum(
-						list.elementAt(list.size() - 2).toPlainTextString()).trim();
+				nomForum = extractNomForum(list.elementAt(list.size() - 2).toPlainTextString()).trim();
 			}
 			if(res.size() > 0)
 				writeAllPostToXml(res, filePath);
