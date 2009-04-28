@@ -12,7 +12,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Servlet implementation class RenameFile
+ * Servlet implementation class CopyFile
+ * Servlet permettant la copie d'un fichier en local
+ * @author Benayoun Vincent, Checconi Maxime
+ * @version 1.0
  */
 public class CopyFile extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -71,6 +74,7 @@ public class CopyFile extends HttpServlet {
 		}
 
 		File file = new File(adresseFile);
+		File newFile = new File(adresseNewFile);
 		System.out.println("exsitance du fichier : " + file.exists());
 		Boolean res1 = copyFile(adresseFile, adresseNewFile);
 		System.out.println("copie reussi : " + res1);
@@ -85,6 +89,12 @@ public class CopyFile extends HttpServlet {
 		return urlRes;
 	}
 
+	/**
+	 * Copie un fichier.
+	 * @param source Source de la copie
+	 * @param destination Destination de la copie 
+	 * @return vrai(true) si la copie reussi ou faux(false) si la copie echoue
+	 */
 	private Boolean copyFile(String source, String destination) {
 		FileChannel in = null; // canal d'entrée
 		FileChannel out = null; // canal de sortie

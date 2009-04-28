@@ -13,11 +13,21 @@ import org.jdom.input.SAXBuilder;
 
 import servlet.ForumHierarchyCrosser;
 
+/**
+ * Classe construisant l'affichage au format HTML en parsant le fichier xml généré lors de l'extraction 
+ * @author Benayoun Vincent, Checconi Maxime
+ * @version 1.0
+ */
 public class HtmlResponseBuilder {
 	
 	private static int idForum = (int)Math.random() * 1000000;
 	private static int idTopic = (int)(Math.random() + 1000000) * 200;
-	
+
+	/**
+	 * Permet de parser le fichier xml afin d'ecrire le resultat dans la response
+	 * @param xmlFile Chemin du fichier xml généré apres l'extraction
+	 * @param out PrintWriter permettant d'ecrire dans la response
+	 */
 	public static void returnResult(File xmlFile, PrintWriter out ) {
 		SAXBuilder sxb = new SAXBuilder();
 		Document doc = null;;
@@ -57,7 +67,13 @@ public class HtmlResponseBuilder {
 		
 
 	}
-	
+
+	/**
+	 * Permet d'ajouter un element Forum dans la response
+	 * @param forum Element forum que l'on souhaire ecrire dans la response
+	 * @param idForum Id du forum courant
+	 * @param out PrintWriter permettant d'ecrire dans la response
+	 */
 	private static void addForum(Element forum, int idForum, PrintWriter out) {
 		String forumName = forum.getAttributeValue("nom");
 		out.println("<div class=\"forum\">");
@@ -69,7 +85,13 @@ public class HtmlResponseBuilder {
 		}
 		out.println("</div>");
 	}
-	
+
+	/**
+	 * Permet d'ajouter un element Topic dans la response
+	 * @param topic Element topic que l'on souhaire ecrire dans la response
+	 * @param idTopic Id du topic courant
+	 * @param out PrintWriter permettant d'ecrire dans la response
+	 */
 	private static void addTopic(Element topic, int idTopic,PrintWriter out) {
 		String topicName = topic.getAttributeValue("nom");
 		out.println("<div class=\"topic\" style=\"display:none\" >");
@@ -90,7 +112,13 @@ public class HtmlResponseBuilder {
 		out.println("</div>");
 		out.println("</div>");
 	}
-	
+
+	/**
+	 * Permet d'ajouter un element Post dans la response
+	 * @param post Element post que l'on souhaire ecrire dans la response
+	 * @param precPost HashMap contenant l'id, l'auteur et la date du post parent
+	 * @param out PrintWriter permettant d'ecrire dans la response
+	 */
 	private static String[] addPost(Element post, PrintWriter out, HashMap<String, String[]> precPost) {
 		String postId = post.getAttributeValue("id");
 		String postAuthor = post.getChildTextTrim("auteur");

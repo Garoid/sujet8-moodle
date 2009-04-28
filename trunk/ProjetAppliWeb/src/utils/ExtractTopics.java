@@ -35,12 +35,25 @@ import org.jdom.filter.ElementFilter;
 import org.jdom.input.SAXBuilder;
 import org.jdom.transform.JDOMSource;
 
+/**
+ * Classe modélisant une extraction de topic d'un forum
+ * @author Benayoun Vincent, Checconi Maxime
+ * @version 1.0
+ */
 public class ExtractTopics {
 
 	private static String nomForum = null;
 	private static String topicName = null;
-	
-	public static void extractalltag(PrintWriter out, String adresse,String filePath, ArrayList<String> oldPostsId, boolean forumIsTopic) {
+
+	/**
+	 * Permet d'extraire tous les tags d'une page HTML représentant un topic
+	 * @param adresse Adresse de la page où l'on va extraire les tags
+	 * @param filePath Chemin du fichier xml qui sera généré apres l'extraction
+	 * @param oldPostId Liste contenant les ids des posts lues dans le xml afin de ne pas extraire les posts deja presents dans le xml
+	 * @param forumIsTopic Boolean permettant de savoir si l'adresse founie représente un forum ou un topic
+	 */
+	public static void extractalltag(String adresse,
+			String filePath, ArrayList<String> oldPostsId, boolean forumIsTopic) {
 		Parser parser = null;
 		AndFilter sujetFiltre = new AndFilter(new TagNameFilter("div"),
 				new HasAttributeFilter("class", "subject"));
@@ -58,14 +71,9 @@ public class ExtractTopics {
 				new HasAttributeFilter("class", "commands"));
 		AndFilter nomForumFiltre = new AndFilter(new TagNameFilter("li"),
 				new HasAttributeFilter("class", "first"));
-		AndFilter isTopicFilter = new AndFilter(new TagNameFilter("body"),
-				new HasAttributeFilter("id", "mod-forum-discuss"));
-		
+
 		try {
 			parser = new Parser(adresse);
-//			// on vérifie que la page courante possède bien les propriété (HTML) d'un TOPIC
-//			if(parser.parse(isTopicFilter).size() == 0)
-//				return;
 		} catch (ParserException e1) {
 			e1.printStackTrace();
 		}
@@ -74,17 +82,17 @@ public class ExtractTopics {
 			NodeList list = parser.parse(sujetFiltre);
 			Node tmp = list.elementAt(0);
 			topicName = extractTextNode(tmp);
-			
+
 			boolean postListNull = (oldPostsId == null);
 			for (int i = 0; i < list.size(); i++) {
-				
+
 				parser.reset();
 				list = parser.parse(idFiltre);
 				Node tmp5 = list.elementAt(i);
 				String id = extractLinkTagAttribute(tmp5, "id");
 				parser.reset();
-				
-				if(postListNull || (! oldPostsId.contains(id))) {
+
+				if (postListNull || (!oldPostsId.contains(id))) {
 
 					list = parser.parse(messageFiltre);
 					Node tmp2 = list.elementAt(i);
@@ -95,7 +103,7 @@ public class ExtractTopics {
 					Node tmp3 = list.elementAt(i);
 					String auteur = extractLinkTagText(tmp3);
 					parser.reset();
-					
+
 					list = parser.parse(divAuteur);
 					Node tmp4 = list.elementAt(i);
 					String date = extractDate(tmp4);
@@ -106,36 +114,44 @@ public class ExtractTopics {
 					String linkParent = extractLinkParent(tmp6.getFirstChild());
 					String parent = extractIdParent(linkParent);
 					parser.reset();
-					
+
 					String idPostPrec = null;
-					if(i>0){
+					if (i > 0) {
 						list = parser.parse(idFiltre);
-						Node tmp7 = list.elementAt(i-1);
+						Node tmp7 = list.elementAt(i - 1);
 						idPostPrec = extractLinkTagAttribute(tmp7, "id");
 						parser.reset();
 					}
 
 					list = parser.parse(idFiltre);
-					Post p = new Post(id, auteur, message, date, parent, idPostPrec);
+					Post p = new Post(id, auteur, message, date, parent,
+							idPostPrec);
 					res.add(p);
 				}
 			}
 			parser.reset();
 			list = parser.parse(nomForumFiltre);
-			if(forumIsTopic){
-				nomForum = extractNomForum(list.elementAt(list.size() - 1).toPlainTextString()).trim();
+			if (forumIsTopic) {
+				nomForum = extractNomForum(
+						list.elementAt(list.size() - 1).toPlainTextString())
+						.trim();
+			} else {
+				nomForum = extractNomForum(
+						list.elementAt(list.size() - 2).toPlainTextString())
+						.trim();
 			}
-			else{
-				nomForum = extractNomForum(list.elementAt(list.size() - 2).toPlainTextString()).trim();
-			}
-			if(res.size() > 0)
+			if (res.size() > 0)
 				writeAllPostToXml(res, filePath);
 		} catch (ParserException e) {
 			e.printStackTrace();
 		}
 	}
-	
 
+	/**
+	 * Permet d'extraire les tags de type Link qui ont pour noeud texte "Show Parent"
+	 * @param node Node sur lequel on applique la méthode
+	 * @return une string représentant un lien ou null si le noeud passé en paramètre n'est pas de type Link
+	 */
 	private static String extractLinkParent(Node node) throws ParserException {
 		if (node instanceof TagNode) {
 			TagNode tag = (TagNode) node;
@@ -152,6 +168,12 @@ public class ExtractTopics {
 		return null;
 	}
 
+	/**
+	 * Permet d'extraire les valeurs des tags de type Link qui ont pour attribut l'attribut passé en paramètre
+	 * @param node Node sur lequel on applique la méthode
+	 * @param attribute Attribut permettant de filtrer notre extraction
+	 * @return une string représentant la valeur du Link en fonction de l'attribut passé en parametre ou null si le noeud passé en paramètre n'est pas de type Link
+	 */
 	private static String extractLinkTagAttribute(Node node, String attribute)
 			throws ParserException {
 		if (node instanceof TagNode) {
@@ -159,13 +181,18 @@ public class ExtractTopics {
 			TagNode tag = (TagNode) node;
 			if (tag instanceof LinkTag) {
 				LinkTag link = (LinkTag) tag;
-				return link.getAttribute("id");
+				return link.getAttribute(attribute);
 			}
 			return null;
 		}
 		return null;
 	}
 
+	/**
+	 * Permet d'extraire le champ text des tags de type Link
+	 * @param node Node sur lequel on applique la méthode
+	 * @return une string représentant le champ text du Link ou null si le noeud passé en paramètre n'est pas de type Link
+	 */
 	private static String extractLinkTagText(Node node) throws ParserException {
 		if (node instanceof TagNode) {
 
@@ -179,6 +206,11 @@ public class ExtractTopics {
 		return null;
 	}
 
+	/**
+	 * Permet d'extraire le message d'un post
+	 * @param node Node sur lequel on applique la méthode
+	 * @return une string représentant le message du post ou null si le noeud passé en paramètre n'est pas de type TagNode ou TextNode
+	 */
 	private static String extractNodeToHtml(Node node) throws ParserException {
 		if (node instanceof TextNode) {
 
@@ -213,6 +245,11 @@ public class ExtractTopics {
 		return null;
 	}
 
+	/**
+	 * Permet d'extraire le nom du topic d'un forum
+	 * @param node Node sur lequel on applique la méthode
+	 * @return une string représentant le nom du topic ou null si le noeud passé en paramètre n'est pas de type TagNode ou TextNode
+	 */
 	private static String extractTextNode(Node node) throws ParserException {
 		if (node instanceof TextNode) {
 			TextNode text = (TextNode) node;
@@ -230,6 +267,11 @@ public class ExtractTopics {
 		return null;
 	}
 
+	/**
+	 * Permet de generer le fichier xml représentant une extraction d'un forum
+	 * @param newPost Liste des nouveaux posts que l'on doit rajouter dans le fichier xml
+	 * @param filePath Chemin du fichier xml qui sera généré apres l'extraction
+	 */
 	private static void writeAllPostToXml(List<Post> newPost, String filePath) {
 		File file = new File(filePath);
 		Document document = null;
@@ -240,11 +282,11 @@ public class ExtractTopics {
 		boolean topicExist = false;
 
 		SAXBuilder sxb = new SAXBuilder();
-		
+
 		if (!file.exists()) {
 			racine = new Element("moodle");
 			document = new Document(racine);
-			
+
 		} else {
 			try {
 				document = sxb.build(new File(filePath));
@@ -255,10 +297,11 @@ public class ExtractTopics {
 				e.printStackTrace();
 			}
 		}
-		
+
 		listChild = racine.getChildren("forum");
 		for (int i = 0; i < listChild.size(); i++) {
-			if (((Element) listChild.get(i)).getAttributeValue("nom").equals(nomForum)) {
+			if (((Element) listChild.get(i)).getAttributeValue("nom").equals(
+					nomForum)) {
 				forumExist = true;
 				forum = ((Element) listChild.get(i));
 				break;
@@ -274,10 +317,11 @@ public class ExtractTopics {
 			forum.addContent(topic);
 			racine.addContent(forum);
 		} else {
-			//on récupère l'élement topic s'il existe déjà
+			// on récupère l'élement topic s'il existe déjà
 			listChild = forum.getChildren("topic");
 			for (int i = 0; i < listChild.size(); i++) {
-				if (((Element) listChild.get(i)).getAttributeValue("nom").equals(topicName)) {
+				if (((Element) listChild.get(i)).getAttributeValue("nom")
+						.equals(topicName)) {
 					topicExist = true;
 					topic = ((Element) listChild.get(i));
 					break;
@@ -289,12 +333,13 @@ public class ExtractTopics {
 				forum.addContent(topic);
 			}
 		}
-		for (Post p : (ArrayList<Post>)newPost) {
+		for (Post p : (ArrayList<Post>) newPost) {
 			Element post = createPostElement(p);
-			if((!forumExist) || (!topicExist) || (p.getIdPostPrec() == null))
+			if ((!forumExist) || (!topicExist) || (p.getIdPostPrec() == null))
 				topic.addContent(post);
-			else {				
-				topic.addContent(getPrecPostIndex(topic, p.getIdPostPrec())+1, post);
+			else {
+				topic.addContent(
+						getPrecPostIndex(topic, p.getIdPostPrec()) + 1, post);
 			}
 		}
 		JDOMSource source = new JDOMSource(document);
@@ -319,7 +364,7 @@ public class ExtractTopics {
 		date = res[1];
 		return date;
 	}
-	
+
 	private static String extractIdParent(String linkParent) {
 		if (linkParent != null) {
 			String idParent = null;
@@ -340,7 +385,12 @@ public class ExtractTopics {
 			return null;
 		}
 	}
-	
+
+	/**
+	 * Permet de créer un element post dans le fichier xml
+	 * @param p Objet post que l'on veut ajouter dans le fichier xml
+	 * @return un element représentant un post au format xml
+	 */
 	private static Element createPostElement(Post p) {
 		Element post = new Element("post");
 		Attribute id = new Attribute("id", p.getId());
@@ -361,13 +411,18 @@ public class ExtractTopics {
 		Element parent = new Element("parent");
 		parent.setText(p.getParent());
 		post.addContent(parent);
-		
+
 		return post;
 	}
-	
+
+	/**
+	 * Permet d'extraire tous les ids des posts deja presents dans le fichier xml
+	 * @param xmlFilePath Chemin du fichier xml sur lequel on veut appliquer la méthode
+	 * @return une liste des ids des posts deja presents dans le fichier xml ou null si xmlFilePath n'existe pas
+	 */
 	public static ArrayList<String> getOldXmlPosts(String xmlFilePath) {
 		File file = new File(xmlFilePath);
-		if(! file.exists())
+		if (!file.exists())
 			return null;
 		SAXBuilder sxb = new SAXBuilder();
 		Document doc = null;
@@ -381,22 +436,23 @@ public class ExtractTopics {
 		Element racine = doc.getRootElement();
 		ArrayList<String> oldPosts = new ArrayList<String>();
 		Iterator<Element> it = racine.getDescendants(new ElementFilter("post"));
-		if(! it.hasNext())
+		if (!it.hasNext())
 			return null;
-		while(it.hasNext()){
+		while (it.hasNext()) {
 			Element post = (Element) it.next();
 			String postId = post.getAttributeValue("id");
 			oldPosts.add(postId);
 		}
 		return oldPosts;
 	}
-	
+
 	private static int getPrecPostIndex(Element topic, String idPrecPost) {
 		List<Element> topicChildren = topic.getChildren("post");
-		for(int i=0; i<topicChildren.size(); i++) {
-			String currentId = topicChildren.get(i).getAttribute("id").getValue();
-			//on cherche l'index du post precedent avec son ID
-			if(currentId.equals(idPrecPost))
+		for (int i = 0; i < topicChildren.size(); i++) {
+			String currentId = topicChildren.get(i).getAttribute("id")
+					.getValue();
+			// on cherche l'index du post precedent avec son ID
+			if (currentId.equals(idPrecPost))
 				return i;
 		}
 		return -1;

@@ -1,5 +1,10 @@
 package utils;
 
+/**
+ * Classe modélisant un Post
+ * @author Benayoun Vincent, Checconi Maxime
+ * @version 1.0
+ */
 public class Post {
 
 	private String id;
