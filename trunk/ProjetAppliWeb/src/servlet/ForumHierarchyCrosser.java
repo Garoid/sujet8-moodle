@@ -3,7 +3,6 @@ package servlet;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.URL;
 import java.util.ArrayList;
 
 import javax.servlet.ServletException;
@@ -24,7 +23,10 @@ import utils.ExtractTopics;
 import utils.HtmlResponseBuilder;
 
 /**
- * Servlet implementation class SubDiscussionChecker
+ * C'est ici que la hierarchie du forum va être parcourue afin d'extraire les files de discussion correspondant à
+ * l'URL donnée en paramètre
+ * @author vincent
+ *
  */
 public class ForumHierarchyCrosser extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -41,11 +43,10 @@ public class ForumHierarchyCrosser extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String adresse = request.getParameter("adresse");
-		pathToLocalForumFiles = "/home/max06";
+		pathToLocalForumFiles = "/home/vincent/wget";
 		pathToLocalXmlFile = this.getClass().getResource("/resources").getPath();
 		pathToLocalXmlFile += "/"+getSiteWebName(adresse)+".xml";
 		
-		//		pathToLocalForumFiles = this.getClass().getResource("/resources/wget").getPath();
 
 //		URL forumURL = new URL(adresse);
 //		Runtime run = Runtime.getRuntime();
@@ -55,19 +56,27 @@ public class ForumHierarchyCrosser extends HttpServlet {
 //		
 //		System.out.println("Wget terminé");
 		
+		//on récupère la liste des post (leur ID) déjà existant dans le fichier XML s'il existe
 		oldPostsId = ExtractTopics.getOldXmlPosts(pathToLocalXmlFile);
 		PrintWriter out = response.getWriter();
 		response.setContentType("text/html");
 		
+		
+		
 		try {
+			//on vérifie si l'adresse donnée correspond à une liste de forums
 			if(! verifySubForumsExistence(adresse, out)) {
+				//si l'adresse pointe sur une liste de discussions
 				if(! verifySubDiscussionsExistence(adresse, out)) {
+					//ou finalement sur une discussion
 					ExtractTopics.extractalltag(out, adresse, pathToLocalXmlFile, oldPostsId, false);
 				}
 			}
 		} catch (ParserException e) {
 			e.printStackTrace();
 		}
+		
+		//si le fichier xml a été créé alors on peut renvoyer les résultats collectés
 		File xmlFile = new File(pathToLocalXmlFile);
 		if(xmlFile.exists())
 			HtmlResponseBuilder.returnResult(xmlFile, out);
@@ -78,6 +87,15 @@ public class ForumHierarchyCrosser extends HttpServlet {
 		doGet(request, response);
 	}
 	
+	
+	/**
+	 * Permet de vérifier si l'URL pointe sur un liste de forums et descend dans les sous catégories
+	 * si c'est le cas
+	 * @param adresse l'URL du forum (ou sous catégorie)
+	 * @param out le flux de sortie
+	 * @return true si l'adresse pointait bien vers une liste de forums, faux sinon
+	 * @throws ParserException
+	 */
 	private boolean verifySubForumsExistence(String adresse, PrintWriter out) throws ParserException {
 		Parser parser = new Parser(adresse);
 		AndFilter subForums = new AndFilter(new TagNameFilter("td"), new HasAttributeFilter("class", "cell c0"));
@@ -95,9 +113,10 @@ public class ForumHierarchyCrosser extends HttpServlet {
 					int index = adresse.lastIndexOf("/");
 					String newURL = adresse.substring(0, index+1);
 					newURL += subForumPageName;
+					//pour chaque href de forum trouvé on appelle la méthode permettant de descendre jusqu'à la discussion
 					if(! verifySubDiscussionsExistence(formatHtmlURL(newURL), out))
 						/*cas particulier où le forum pointe directement sur une 
-						 * file de discussion et non sur une liste de files de discussion */
+						 * file de discussion et non sur une liste de discussions */
 						ExtractTopics.extractalltag(out, formatHtmlURL(newURL), pathToLocalXmlFile, oldPostsId, true);
 				}
 			}
@@ -106,6 +125,14 @@ public class ForumHierarchyCrosser extends HttpServlet {
 		return false;
 	}
 	
+	/**
+	 * Permet de vérifier si l'URL pointe sur un liste de discussions et descend dans les sous catégories
+	 * si c'est le cas
+	 * @param adresse l'URL du forum (ou sous catégorie)
+	 * @param out le flux de sortie
+	 * @return true si l'adresse pointait bien vers une liste de discussions, faux sinon
+	 * @throws ParserException
+	 */
 	private boolean verifySubDiscussionsExistence(String adresse, PrintWriter out) throws ParserException {
 		Parser parser = new Parser(adresse);
 		//on récupère ce tag qui est unique et caractérise une page listant des files de discussion
@@ -127,12 +154,23 @@ public class ForumHierarchyCrosser extends HttpServlet {
 		return false;
 	}
 
+	/**
+	 * Remplace le ? précédent les headers en fin d'adresse par %3f (code HTML)
+	 * @param url l'adresse à modifier
+	 * @return l'adresse formatée
+	 */
 	private String formatHtmlURL(String url) {
 		String formatedURL = url.replaceFirst("http://", "file://" + pathToLocalForumFiles + "/");
 		formatedURL = formatedURL.replaceAll("\\?", "%3F");
 		return formatedURL;
 	}
 	
+	/**
+	 * Récupère le nom du site web afin de pouvoir créer des fichiers XML au nom unique
+	 * et facilement retrouvable
+	 * @param adresse l'URL du forum
+	 * @return le nom du site web visitée débarassé des www. ou http:// ou file://
+	 */
 	private String getSiteWebName(String adresse) {
 		String res = adresse;
 		if(adresse.contains("http://"))

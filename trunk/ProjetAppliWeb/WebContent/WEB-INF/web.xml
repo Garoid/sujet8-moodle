@@ -39,4 +39,14 @@
     <servlet-name>CopyFile</servlet-name>
     <url-pattern>/CopyFile</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>ExtractToLocal</display-name>
+    <servlet-name>ExtractToLocal</servlet-name>
+    <servlet-class>servlet.ExtractToLocal</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ExtractToLocal</servlet-name>
+    <url-pattern>/ExtractToLocal</url-pattern>
+  </servlet-mapping>
 </web-app>

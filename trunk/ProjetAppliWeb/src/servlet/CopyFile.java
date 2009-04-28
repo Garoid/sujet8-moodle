@@ -71,7 +71,6 @@ public class CopyFile extends HttpServlet {
 		}
 
 		File file = new File(adresseFile);
-		File newFile = new File(adresseNewFile);
 		System.out.println("exsitance du fichier : " + file.exists());
 		Boolean res1 = copyFile(adresseFile, adresseNewFile);
 		System.out.println("copie reussi : " + res1);

@@ -1,7 +1,8 @@
 
 var req;
 function extract(){
-	copyFile();
+	extractToLocal();
+	//copyFile();
 	var adresse = document.getElementById("adresse");
 	var url = "ForumHierarchyCrosser?adresse="+ adresse.value;
 	//alert(url);
@@ -30,6 +31,15 @@ function copyFile(){
 
 	var adresse = document.getElementById("adresse");
 	var url = "CopyFile?adresse="+ adresse.value;
+	req = new XMLHttpRequest();
+    req.open("get",url,true);
+    req.send(null);
+}
+
+function extractToLocal(){
+
+	var adresse = document.getElementById("adresse");
+	var url = "ExtractToLocal?adresse="+ adresse.value;
 	req = new XMLHttpRequest();
     req.open("get",url,true);
     req.send(null);
