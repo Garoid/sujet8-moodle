@@ -13,6 +13,8 @@
 <p>
 Adresse du forum à extraire :
 <input type="text" id="adresse" name="adresse" />
+Chemin vers le répertoire contenant les fichiers du forum :
+<input type="text" id="path" name="path" />
 <input type="button" value="Extaire" onclick="extract()"/>
 </p>
 <div id="results">    

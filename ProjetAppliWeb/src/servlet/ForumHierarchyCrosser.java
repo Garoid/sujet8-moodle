@@ -65,11 +65,11 @@ public class ForumHierarchyCrosser extends HttpServlet {
 		
 		try {
 			//on vérifie si l'adresse donnée correspond à une liste de forums
-			if(! verifySubForumsExistence(adresse, out)) {
+			if(! verifySubForumsExistence(adresse)) {
 				//si l'adresse pointe sur une liste de discussions
-				if(! verifySubDiscussionsExistence(adresse, out)) {
+				if(! verifySubDiscussionsExistence(adresse)) {
 					//ou finalement sur une discussion
-					ExtractTopics.extractalltag(out, adresse, pathToLocalXmlFile, oldPostsId, false);
+					ExtractTopics.extractalltag(adresse, pathToLocalXmlFile, oldPostsId, false);
 				}
 			}
 		} catch (ParserException e) {
@@ -96,7 +96,7 @@ public class ForumHierarchyCrosser extends HttpServlet {
 	 * @return true si l'adresse pointait bien vers une liste de forums, faux sinon
 	 * @throws ParserException
 	 */
-	private boolean verifySubForumsExistence(String adresse, PrintWriter out) throws ParserException {
+	private boolean verifySubForumsExistence(String adresse) throws ParserException {
 		Parser parser = new Parser(adresse);
 		AndFilter subForums = new AndFilter(new TagNameFilter("td"), new HasAttributeFilter("class", "cell c0"));
 		AndFilter subForumsBis = new AndFilter(new TagNameFilter("td"), new HasAttributeFilter("class", "cell c1"));
@@ -114,10 +114,10 @@ public class ForumHierarchyCrosser extends HttpServlet {
 					String newURL = adresse.substring(0, index+1);
 					newURL += subForumPageName;
 					//pour chaque href de forum trouvé on appelle la méthode permettant de descendre jusqu'à la discussion
-					if(! verifySubDiscussionsExistence(formatHtmlURL(newURL), out))
+					if(! verifySubDiscussionsExistence(formatHtmlURL(newURL)))
 						/*cas particulier où le forum pointe directement sur une 
 						 * file de discussion et non sur une liste de discussions */
-						ExtractTopics.extractalltag(out, formatHtmlURL(newURL), pathToLocalXmlFile, oldPostsId, true);
+						ExtractTopics.extractalltag(formatHtmlURL(newURL), pathToLocalXmlFile, oldPostsId, true);
 				}
 			}
 			return true;
@@ -133,7 +133,7 @@ public class ForumHierarchyCrosser extends HttpServlet {
 	 * @return true si l'adresse pointait bien vers une liste de discussions, faux sinon
 	 * @throws ParserException
 	 */
-	private boolean verifySubDiscussionsExistence(String adresse, PrintWriter out) throws ParserException {
+	private boolean verifySubDiscussionsExistence(String adresse) throws ParserException {
 		Parser parser = new Parser(adresse);
 		//on récupère ce tag qui est unique et caractérise une page listant des files de discussion
 		AndFilter forumHeaderList = new AndFilter(new TagNameFilter("table"), new HasAttributeFilter("class", "forumheaderlist"));
@@ -146,7 +146,7 @@ public class ForumHierarchyCrosser extends HttpServlet {
 				for (int i = 0; i < topicStarters.size(); i++) {
 					TagNode linkNode = (TagNode) topicStarters.elementAt(i).getChildren().elementAt(0);
 					String hrefSubDiscussion = linkNode.getAttribute("href");
-					ExtractTopics.extractalltag(out, formatHtmlURL(hrefSubDiscussion), pathToLocalXmlFile, oldPostsId, false);
+					ExtractTopics.extractalltag(formatHtmlURL(hrefSubDiscussion), pathToLocalXmlFile, oldPostsId, false);
 				}
 			}
 			return true;

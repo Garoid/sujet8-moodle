@@ -24,6 +24,9 @@ import org.jdom.transform.JDOMSource;
 
 /**
  * Servlet implementation class XmlToRdf
+ * Servlet permettant de générer un fichier rdf à partir d'un fichier xml
+ * @author Benayoun Vincent, Checconi Maxime
+ * @version 1.0
  */
 public class XmlToRdf extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -51,8 +54,7 @@ public class XmlToRdf extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		PrintWriter out = response.getWriter();
-		exportXmlToRdf(pathToLocalXmlFile, pathToLocalXslFile,
-				pathToLocalRdfFile, out);
+		exportXmlToRdf(pathToLocalXmlFile, pathToLocalXslFile, pathToLocalRdfFile, out);
 	}
 
 	/**
@@ -64,6 +66,13 @@ public class XmlToRdf extends HttpServlet {
 		// TODO Auto-generated method stub
 	}
 
+	/**
+	 * Permet d'exporter un fichier xml en rdf en appliquant un fichier xsl sur le fichier xml
+	 * @param rootPath Fichier xml que l'on souhaite exporter au format rdf
+	 * @param fichierXSL Feuille de style xsl que l'on va appliquer sur le fichier xml
+	 * @param outPutFilePath Fichier xml généré au format rdf 
+	 * @param out PrintWriter permettant d'ecrire dans la response 
+	 */
 	private void exportXmlToRdf(String rootPath, String fichierXSL,
 			String outputFilePath, PrintWriter out) {
 		JDOMResult documentJDOMSortie = new JDOMResult();
@@ -78,24 +87,17 @@ public class XmlToRdf extends HttpServlet {
 			try {
 				document = sxb.build(file);
 				TransformerFactory factory = TransformerFactory.newInstance();
-				Transformer transformer = factory
-						.newTransformer(new StreamSource(fichierXSL));
-				transformer.transform(new JDOMSource(document),
-						documentJDOMSortie);
+				Transformer transformer = factory.newTransformer(new StreamSource(fichierXSL));
+				transformer.transform(new JDOMSource(document),documentJDOMSortie);
 				resultat = documentJDOMSortie.getDocument();
-				XMLOutputter outputter = new XMLOutputter(Format
-						.getPrettyFormat());
-				outputter
-						.output(resultat, new FileOutputStream(outputFilePath));
+				XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
+				outputter.output(resultat, new FileOutputStream(outputFilePath));
 				out.println("Votre fichier RDF a ete cree.");
 			} catch (JDOMException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (TransformerException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
